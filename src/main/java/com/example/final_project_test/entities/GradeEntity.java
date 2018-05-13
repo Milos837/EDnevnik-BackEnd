@@ -9,6 +9,9 @@ public class GradeEntity {
 	private Integer id;
 	private EGradeValue value;
 	private Date date;
+	private Boolean finalGrade;
+	private StudentEntity student;
+	private CourseEntity course;
 	private Integer version;
 	
 	public GradeEntity() {
@@ -31,6 +34,24 @@ public class GradeEntity {
 	}
 	public void setDate(Date date) {
 		this.date = date;
+	}
+	public Boolean getFinalGrade() {
+		return finalGrade;
+	}
+	public void setFinalGrade(Boolean finalGrade) {
+		this.finalGrade = finalGrade;
+	}
+	public StudentEntity getStudent() {
+		return student;
+	}
+	public void setStudent(StudentEntity student) {
+		this.student = student;
+	}
+	public CourseEntity getCourse() {
+		return course;
+	}
+	public void setCourse(CourseEntity course) {
+		this.course = course;
 	}
 	public Integer getVersion() {
 		return version;
