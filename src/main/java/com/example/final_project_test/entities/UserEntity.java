@@ -1,15 +1,36 @@
 package com.example.final_project_test.entities;
 
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Version;
+
 import com.example.final_project_test.entities.enums.EUserRole;
 
+@MappedSuperclass
 public class UserEntity {
 	
+	@Id
+	@GeneratedValue
 	private Integer id;
+	
+	@Column
 	private String username;
+	
+	@Column
 	private String password;
+	
+	@Column
 	private String firstName;
+	
+	@Column
 	private String lastName;
+	
+	@Column
 	private EUserRole role;
+	
+	@Version
 	private Integer version;
 	
 	public UserEntity() {

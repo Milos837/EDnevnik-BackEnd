@@ -2,20 +2,67 @@ package com.example.final_project_test.entities;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
 import com.example.final_project_test.entities.enums.ECourseSemester;
 import com.example.final_project_test.entities.enums.ESchoolYear;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
+@Entity
+@Table(name = "course")
 public class CourseEntity {
 	
+	@Id
+	@GeneratedValue
 	private Integer id;
+	
+	@Column
 	private String name;
+	
+	@Column
 	private Integer weeklyHours;
+	
+	@Column
 	private ESchoolYear year;
+	
+	@Column
 	private ECourseSemester semester;
+	
+	@ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JoinTable(name = "teacher_course", joinColumns =
+		{@JoinColumn(name = "teacher_id", nullable = false, updatable = false) },
+		inverseJoinColumns = { @JoinColumn(name = "course_id",
+		nullable = false, updatable = false) })
 	private List<TeacherEntity> teachers;
+	
+	@ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JoinTable(name = "class_course", joinColumns =
+		{@JoinColumn(name = "class_id", nullable = false, updatable = false) },
+		inverseJoinColumns = { @JoinColumn(name = "course_id",
+		nullable = false, updatable = false) })
 	private List<ClassEntity> classes;
+	
+	@OneToMany(mappedBy = "course", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JsonBackReference
 	private List<GradeEntity> grades;
+	
+	@Version
 	private Integer version;
+	
+	public CourseEntity() {
+		super();
+	}
 	
 	public Integer getId() {
 		return id;
@@ -89,9 +136,6 @@ public class CourseEntity {
 		this.version = version;
 	}
 
-	public CourseEntity() {
-		super();
-	}
 	
 
 }

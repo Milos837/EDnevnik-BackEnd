@@ -2,16 +2,53 @@ package com.example.final_project_test.entities;
 
 import java.util.List;
 
-import com.example.final_project_test.entities.enums.ESchoolYear;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
 
+import com.example.final_project_test.entities.enums.ESchoolYear;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Entity
+@Table(name = "class")
 public class ClassEntity {
 	
+	@Id
+	@GeneratedValue
 	private Integer id;
+	
+	@Column
 	private String name;
+	
+	@Column
 	private ESchoolYear year;
+	
+	@OneToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JoinColumn(name = "supervisorTeacher")
 	private TeacherEntity supervisorTeacher;
+	
+	@OneToMany(mappedBy = "attendingClass", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JsonBackReference
 	private List<StudentEntity> students;
+	
+	@ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JoinTable(name = "class_course", joinColumns =
+		{@JoinColumn(name = "class_id", nullable = false, updatable = false) },
+		inverseJoinColumns = { @JoinColumn(name = "course_id",
+		nullable = false, updatable = false) })
 	private List<CourseEntity> courses;
+	
+	@Version
 	private Integer version;
 	
 	public ClassEntity() {
