@@ -1,6 +1,6 @@
 package com.example.final_project_test.entities;
 
-import java.util.List;
+import java.util.List; 
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -9,8 +9,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -40,13 +38,6 @@ public class ClassEntity {
 	@OneToMany(mappedBy = "attendingClass", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JsonBackReference
 	private List<StudentEntity> students;
-	
-	@ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JoinTable(name = "class_course", joinColumns =
-		{@JoinColumn(name = "class_id", nullable = false, updatable = false) },
-		inverseJoinColumns = { @JoinColumn(name = "course_id",
-		nullable = false, updatable = false) })
-	private List<CourseEntity> courses;
 	
 	@Version
 	private Integer version;
@@ -83,12 +74,6 @@ public class ClassEntity {
 	}
 	public void setStudents(List<StudentEntity> students) {
 		this.students = students;
-	}
-	public List<CourseEntity> getCourses() {
-		return courses;
-	}
-	public void setCourses(List<CourseEntity> courses) {
-		this.courses = courses;
 	}
 	public Integer getVersion() {
 		return version;

@@ -1,7 +1,7 @@
 package com.example.final_project_test.entities.enums;
 
-public enum EUserRole {
+public enum EGradeType {
 	
-	STUDENT, PARENT, TEACHER, ADMIN
+	TEST, ESSAY, ORAL, FINAL
 
 }

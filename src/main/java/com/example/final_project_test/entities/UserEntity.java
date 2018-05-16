@@ -3,12 +3,13 @@ package com.example.final_project_test.entities;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
-import com.example.final_project_test.entities.enums.EUserRole;
-
 @MappedSuperclass
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class UserEntity {
 	
 	@Id
@@ -26,9 +27,6 @@ public class UserEntity {
 	
 	@Column
 	private String lastName;
-	
-	@Column
-	private EUserRole role;
 	
 	@Version
 	private Integer version;
@@ -65,12 +63,6 @@ public class UserEntity {
 	}
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
-	}
-	public EUserRole getRole() {
-		return role;
-	}
-	public void setRole(EUserRole role) {
-		this.role = role;
 	}
 	public Integer getVersion() {
 		return version;

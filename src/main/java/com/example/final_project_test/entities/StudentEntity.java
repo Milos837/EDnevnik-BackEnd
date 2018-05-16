@@ -1,4 +1,5 @@
 package com.example.final_project_test.entities;
+ 
 
 import java.util.List;
 
@@ -20,13 +21,13 @@ public class StudentEntity extends UserEntity{
 	@JoinColumn(name = "attendingClass")
 	private ClassEntity attendingClass;
 	
-	@OneToMany(mappedBy = "student", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JsonBackReference
-	private List<GradeEntity> grades;
-	
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "parent")
 	private ParentEntity parent;
+	
+	@OneToMany(mappedBy = "student", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JsonBackReference
+	private List<StudentCourseEntity> studentCourse;
 
 	public StudentEntity() {
 		super();
@@ -40,20 +41,20 @@ public class StudentEntity extends UserEntity{
 		this.attendingClass = attendingClass;
 	}
 
-	public List<GradeEntity> getGrades() {
-		return grades;
-	}
-
-	public void setGrades(List<GradeEntity> grades) {
-		this.grades = grades;
-	}
-
 	public ParentEntity getParent() {
 		return parent;
 	}
 
 	public void setParent(ParentEntity parent) {
 		this.parent = parent;
+	}
+
+	public List<StudentCourseEntity> getStudentCourse() {
+		return studentCourse;
+	}
+
+	public void setStudentCourse(List<StudentCourseEntity> studentCourse) {
+		this.studentCourse = studentCourse;
 	}
 
 }

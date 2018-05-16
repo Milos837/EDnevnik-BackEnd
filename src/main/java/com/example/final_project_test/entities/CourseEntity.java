@@ -8,9 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -39,23 +36,13 @@ public class CourseEntity {
 	@Column
 	private ECourseSemester semester;
 	
-	@ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JoinTable(name = "teacher_course", joinColumns =
-		{@JoinColumn(name = "teacher_id", nullable = false, updatable = false) },
-		inverseJoinColumns = { @JoinColumn(name = "course_id",
-		nullable = false, updatable = false) })
-	private List<TeacherEntity> teachers;
-	
-	@ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JoinTable(name = "class_course", joinColumns =
-		{@JoinColumn(name = "class_id", nullable = false, updatable = false) },
-		inverseJoinColumns = { @JoinColumn(name = "course_id",
-		nullable = false, updatable = false) })
-	private List<ClassEntity> classes;
+	@OneToMany(mappedBy = "course", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JsonBackReference
+	private List<TeacherCourseEntity> teacherCourse;
 	
 	@OneToMany(mappedBy = "course", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JsonBackReference
-	private List<GradeEntity> grades;
+	private List<StudentCourseEntity> studentCourse;
 	
 	@Version
 	private Integer version;
@@ -104,28 +91,20 @@ public class CourseEntity {
 		this.semester = semester;
 	}
 
-	public List<TeacherEntity> getTeachers() {
-		return teachers;
+	public List<TeacherCourseEntity> getTeacherCourse() {
+		return teacherCourse;
 	}
 
-	public void setTeachers(List<TeacherEntity> teachers) {
-		this.teachers = teachers;
+	public void setTeacherCourse(List<TeacherCourseEntity> teacherCourse) {
+		this.teacherCourse = teacherCourse;
 	}
 
-	public List<ClassEntity> getClasses() {
-		return classes;
+	public List<StudentCourseEntity> getStudentCourse() {
+		return studentCourse;
 	}
 
-	public void setClasses(List<ClassEntity> classes) {
-		this.classes = classes;
-	}
-
-	public List<GradeEntity> getGrades() {
-		return grades;
-	}
-
-	public void setGrades(List<GradeEntity> grades) {
-		this.grades = grades;
+	public void setStudentCourse(List<StudentCourseEntity> studentCourse) {
+		this.studentCourse = studentCourse;
 	}
 
 	public Integer getVersion() {
