@@ -1,7 +1,7 @@
 package com.example.final_project_test.controllers;
 
-import java.time.Instant;
-import java.util.Date;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ public class GradeController {
 	// Dodaj novi
 	@PostMapping(value = "/")
 	public ResponseEntity<?> createNew(@RequestBody GradeEntity gradeEntity) {
-		gradeEntity.setDate(Date.from(Instant.now()));
+		gradeEntity.setDate(ZonedDateTime.now(ZoneOffset.UTC));
 		gradeEntity.setFinalGrade(false);
 		return new ResponseEntity<GradeEntity>(gradeRepository.save(gradeEntity), HttpStatus.OK);
 	}
@@ -57,6 +57,9 @@ public class GradeController {
 			GradeEntity grade = gradeRepository.findById(id).get();
 			if (gradeEntity.getValue() != null) {
 				grade.setValue(gradeEntity.getValue());
+			}
+			if (gradeEntity.getType() != null) {
+				grade.setType(gradeEntity.getType());
 			}
 			return new ResponseEntity<GradeEntity>(gradeRepository.save(grade), HttpStatus.OK);
 		}

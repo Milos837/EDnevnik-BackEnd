@@ -1,6 +1,6 @@
 package com.example.final_project_test.entities;
 
-import java.util.Date;
+import java.time.ZonedDateTime; 
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -31,7 +31,7 @@ public class GradeEntity {
 	private EGradeType type;
 
 	@Column
-	private Date date;
+	private ZonedDateTime dateUTC;
 
 	@Column
 	private Boolean finalGrade;
@@ -71,12 +71,12 @@ public class GradeEntity {
 		this.type = type;
 	}
 
-	public Date getDate() {
-		return date;
+	public ZonedDateTime getDate() {
+		return dateUTC;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public void setDate(ZonedDateTime dateUTC) {
+		this.dateUTC = dateUTC;
 	}
 
 	public Boolean getFinalGrade() {
