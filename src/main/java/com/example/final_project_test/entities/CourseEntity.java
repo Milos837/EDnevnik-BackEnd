@@ -5,6 +5,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -30,19 +32,17 @@ public class CourseEntity {
 	@Column
 	private Integer weeklyHours;
 	
-	@Column
+	//@Column
+	@Enumerated(EnumType.STRING)
 	private ESchoolYear year;
 	
-	@Column
+	//@Column
+	@Enumerated(EnumType.STRING)
 	private ECourseSemester semester;
 	
 	@OneToMany(mappedBy = "course", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JsonBackReference
 	private List<TeacherCourseEntity> teacherCourse;
-	
-	@OneToMany(mappedBy = "course", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JsonBackReference
-	private List<StudentCourseEntity> studentCourse;
 	
 	@Version
 	private Integer version;
@@ -97,14 +97,6 @@ public class CourseEntity {
 
 	public void setTeacherCourse(List<TeacherCourseEntity> teacherCourse) {
 		this.teacherCourse = teacherCourse;
-	}
-
-	public List<StudentCourseEntity> getStudentCourse() {
-		return studentCourse;
-	}
-
-	public void setStudentCourse(List<StudentCourseEntity> studentCourse) {
-		this.studentCourse = studentCourse;
 	}
 
 	public Integer getVersion() {

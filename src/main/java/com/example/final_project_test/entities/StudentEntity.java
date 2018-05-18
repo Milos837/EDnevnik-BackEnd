@@ -27,7 +27,7 @@ public class StudentEntity extends UserEntity{
 	
 	@OneToMany(mappedBy = "student", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JsonBackReference
-	private List<StudentCourseEntity> studentCourse;
+	private List<StudentTeacherCourseEntity> studentTeacherCourse;
 
 	public StudentEntity() {
 		super();
@@ -49,12 +49,12 @@ public class StudentEntity extends UserEntity{
 		this.parent = parent;
 	}
 
-	public List<StudentCourseEntity> getStudentCourse() {
-		return studentCourse;
+	public List<StudentTeacherCourseEntity> getStudentTeacherCourse() {
+		return studentTeacherCourse;
 	}
 
-	public void setStudentCourse(List<StudentCourseEntity> studentCourse) {
-		this.studentCourse = studentCourse;
+	public void setStudentTeacherCourse(List<StudentTeacherCourseEntity> studentTeacherCourse) {
+		this.studentTeacherCourse = studentTeacherCourse;
 	}
 
 }

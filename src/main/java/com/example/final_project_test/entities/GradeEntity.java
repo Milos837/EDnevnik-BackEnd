@@ -5,6 +5,8 @@ import java.time.ZonedDateTime;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -24,10 +26,12 @@ public class GradeEntity {
 	@GeneratedValue
 	private Integer id;
 
-	@Column
+	//@Column
+	@Enumerated(EnumType.STRING)
 	private EGradeValue value;
 
-	@Column
+	//@Column
+	@Enumerated(EnumType.STRING)
 	private EGradeType type;
 
 	@Column
@@ -37,8 +41,8 @@ public class GradeEntity {
 	private Boolean finalGrade;
 	
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JoinColumn(name = "studentCourse")
-	private StudentCourseEntity studentCourse;
+	@JoinColumn(name = "studentTeacherCourse")
+	private StudentTeacherCourseEntity studentTeacherCourse;
 
 	@Version
 	private Integer version;
@@ -87,12 +91,12 @@ public class GradeEntity {
 		this.finalGrade = finalGrade;
 	}
 
-	public StudentCourseEntity getStudentCourse() {
-		return studentCourse;
+	public StudentTeacherCourseEntity getStudentTeacherCourse() {
+		return studentTeacherCourse;
 	}
 
-	public void setStudentCourse(StudentCourseEntity studentCourse) {
-		this.studentCourse = studentCourse;
+	public void setStudentTeacherCourse(StudentTeacherCourseEntity studentTeacherCourse) {
+		this.studentTeacherCourse = studentTeacherCourse;
 	}
 
 	public Integer getVersion() {

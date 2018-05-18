@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,11 +16,10 @@ import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.ParentEntity;
 import com.example.final_project_test.repositories.ParentRepository;
 
-
 @RestController
 @RequestMapping(value = "/api/v1/parents")
 public class ParentController {
-	
+
 	@Autowired
 	private ParentRepository parentRepository;
 
@@ -35,6 +36,12 @@ public class ParentController {
 			return new ResponseEntity<ParentEntity>(parentRepository.findById(id).get(), HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(4, "Parent not found."), HttpStatus.NOT_FOUND);
+	}
+
+	// Dodaj novi
+	@PostMapping(value = "/")
+	public ResponseEntity<?> createNew(@RequestBody ParentEntity parentEntity) {
+		return new ResponseEntity<ParentEntity>(parentRepository.save(parentEntity), HttpStatus.OK);
 	}
 
 }

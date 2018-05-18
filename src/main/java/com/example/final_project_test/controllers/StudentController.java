@@ -1,12 +1,14 @@
 package com.example.final_project_test.controllers;
 
-import java.util.List;
+import java.util.List; 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,6 +37,12 @@ public class StudentController {
 			return new ResponseEntity<StudentEntity>(studentRepository.findById(id).get(), HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
+	}
+
+	// Dodaj novi
+	@PostMapping(value = "/")
+	public ResponseEntity<?> createNew(@RequestBody StudentEntity studentEntity) {
+		return new ResponseEntity<StudentEntity>(studentRepository.save(studentEntity), HttpStatus.OK);
 	}
 
 }
