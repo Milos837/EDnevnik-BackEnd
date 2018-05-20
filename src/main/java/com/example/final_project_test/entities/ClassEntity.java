@@ -15,6 +15,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.example.final_project_test.entities.enums.ESchoolYear;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -28,10 +30,13 @@ public class ClassEntity {
 	private Integer id;
 	
 	@Column
+	@NotNull(message = "Class name must not be null.")
+	@Size(min = 3, max = 10, message = "Class name must be between {min} and {max} characters.")
 	private String name;
 	
 	//@Column
 	@Enumerated(EnumType.STRING)
+	@NotNull(message = "Year must not be null.")
 	private ESchoolYear year;
 	
 	@OneToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)

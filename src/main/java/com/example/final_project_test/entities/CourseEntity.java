@@ -1,6 +1,6 @@
 package com.example.final_project_test.entities;
 
-import java.util.List;
+import java.util.List; 
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,6 +13,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.example.final_project_test.entities.enums.ECourseSemester;
 import com.example.final_project_test.entities.enums.ESchoolYear;
@@ -27,17 +31,24 @@ public class CourseEntity {
 	private Integer id;
 	
 	@Column
+	@NotNull(message = "Course name must not be null.")
+	@Size(min = 5, max = 30, message = "Course name must be between {min} and {max} characters.")
 	private String name;
 	
 	@Column
+	@NotNull(message = "Weekly hours must not be null.")
+	@Min(value = 0, message = "Weekly hours cannot be less than zero.")
+	@Max(value = 40, message = "Weekly hours cannot be above 40.")
 	private Integer weeklyHours;
 	
 	//@Column
+	@NotNull(message = "Year must not be null.")
 	@Enumerated(EnumType.STRING)
 	private ESchoolYear year;
 	
 	//@Column
 	@Enumerated(EnumType.STRING)
+	@NotNull(message = "Semester must not be null.")
 	private ECourseSemester semester;
 	
 	@OneToMany(mappedBy = "course", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)

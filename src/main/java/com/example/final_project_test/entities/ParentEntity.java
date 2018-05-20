@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -16,6 +18,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 public class ParentEntity extends UserEntity{
 	
 	@Column
+	@NotNull(message = "Email must not be null.")
+	@Email(message = "Email not formated correctly.")
 	private String email;
 	
 	@OneToMany(mappedBy = "parent", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)

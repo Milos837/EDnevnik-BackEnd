@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
 
 import com.example.final_project_test.entities.enums.EGradeType;
 import com.example.final_project_test.entities.enums.EGradeValue;
@@ -28,10 +29,12 @@ public class GradeEntity {
 
 	//@Column
 	@Enumerated(EnumType.STRING)
+	@NotNull(message = "Grade value must not be null.")
 	private EGradeValue value;
 
 	//@Column
 	@Enumerated(EnumType.STRING)
+	@NotNull(message = "Grade type must not be null.")
 	private EGradeType type;
 
 	@Column
