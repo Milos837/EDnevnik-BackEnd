@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.final_project_test.controllers.util.RESTError;
-import com.example.final_project_test.controllers.util.TeacherCustomValidator;
 import com.example.final_project_test.entities.TeacherEntity;
 import com.example.final_project_test.entities.dto.TeacherDto;
 import com.example.final_project_test.repositories.TeacherRepository;
+import com.example.final_project_test.validation.TeacherCustomValidator;
 
 @RestController
 @RequestMapping(value = "/api/v1/teachers")
@@ -32,7 +32,7 @@ public class TeacherController {
 	
 	@Autowired
 	private TeacherCustomValidator teacherValidator;
-	
+
 	@InitBinder
 	protected void initBinder(final WebDataBinder binder) {
 		binder.addValidators(teacherValidator);

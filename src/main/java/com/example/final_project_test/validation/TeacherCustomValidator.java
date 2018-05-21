@@ -1,4 +1,4 @@
-package com.example.final_project_test.controllers.util;
+package com.example.final_project_test.validation;
 
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

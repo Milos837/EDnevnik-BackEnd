@@ -3,8 +3,11 @@ package com.example.final_project_test.entities.dto;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.example.final_project_test.validation.UniqueUsername;
+
 public class StudentDto {
 
+	@UniqueUsername
 	@NotNull(message = "Username must not be null")
 	@Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters.")
 	private String username;
