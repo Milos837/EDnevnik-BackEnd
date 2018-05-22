@@ -4,8 +4,12 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.example.final_project_test.validation.UniqueEmail;
+import com.example.final_project_test.validation.UniqueUsername;
+
 public class ParentDto {
 	
+	@UniqueUsername
 	@NotNull(message = "Username must not be null")
 	@Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters.")
 	private String username;
@@ -25,6 +29,7 @@ public class ParentDto {
 	@Size(min = 2, max = 30, message = "First name must be between {min} and {max} characters.")
 	private String lastName;
 	
+	@UniqueEmail
 	@NotNull(message = "Email must not be null.")
 	@Email(message = "Email not formated correctly.")
 	private String email;
