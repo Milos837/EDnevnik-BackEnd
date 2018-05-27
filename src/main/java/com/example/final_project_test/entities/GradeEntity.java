@@ -1,6 +1,6 @@
 package com.example.final_project_test.entities;
 
-import java.time.ZonedDateTime; 
+import java.time.ZonedDateTime;  
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

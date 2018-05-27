@@ -1,6 +1,6 @@
 package com.example.final_project_test.entities;
 
-import java.util.List; 
+import java.util.List;   
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -16,7 +16,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.Pattern;
 
 import com.example.final_project_test.entities.enums.ESchoolYear;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -30,13 +30,12 @@ public class ClassEntity {
 	private Integer id;
 	
 	@Column
-	@NotNull(message = "Class name must not be null.")
-	@Size(min = 3, max = 10, message = "Class name must be between {min} and {max} characters.")
-	private String name;
+	@NotNull(message = "Class number must not be null.")
+	@Pattern(regexp = "^[1-9{n}]$", message = "Class number must be integer in range of [1-9].")
+	private String classNumber;
 	
-	//@Column
 	@Enumerated(EnumType.STRING)
-	@NotNull(message = "Year must not be null.")
+	@NotNull(message = "Year is null or invalid. Accepted values: [FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH].")
 	private ESchoolYear year;
 	
 	@OneToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
@@ -59,11 +58,11 @@ public class ClassEntity {
 	public void setId(Integer id) {
 		this.id = id;
 	}
-	public String getName() {
-		return name;
+	public String getClassNumber() {
+		return classNumber;
 	}
-	public void setName(String name) {
-		this.name = name;
+	public void setClassNumber(String classNumber) {
+		this.classNumber = classNumber;
 	}
 	public ESchoolYear getYear() {
 		return year;
