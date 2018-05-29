@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,8 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.final_project_test.controllers.util.RESTError;
+import com.example.final_project_test.entities.CourseEntity;
+import com.example.final_project_test.entities.TeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherEntity;
 import com.example.final_project_test.entities.dto.TeacherDto;
+import com.example.final_project_test.repositories.CourseRepository;
+import com.example.final_project_test.repositories.TeacherCourseRepository;
 import com.example.final_project_test.repositories.TeacherRepository;
 import com.example.final_project_test.validation.TeacherCustomValidator;
 
@@ -29,6 +34,12 @@ public class TeacherController {
 
 	@Autowired
 	private TeacherRepository teacherRepository;
+	
+	@Autowired
+	private CourseRepository courseRepository;
+	
+	@Autowired
+	private TeacherCourseRepository	teacherCourseRepository;
 	
 	@Autowired
 	private TeacherCustomValidator teacherValidator;
@@ -69,6 +80,40 @@ public class TeacherController {
 		teacher.setPassword(newTeacher.getPassword());
 		teacherRepository.save(teacher);
 		return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
+	}
+	
+	//	Dodaj predmet za profesora
+	@PostMapping(value = "/{teacherId}/courses/{courseId}")
+	public ResponseEntity<?> addCourseForTeacher(@PathVariable Integer teacherId, @PathVariable Integer courseId) {
+		if(teacherRepository.existsById(teacherId)) {
+			if(courseRepository.existsById(courseId)) {
+				TeacherCourseEntity TCE = new TeacherCourseEntity();
+				TCE.setTeacher(teacherRepository.findById(teacherId).get());
+				TCE.setCourse(courseRepository.findById(courseId).get());
+				teacherCourseRepository.save(TCE);
+				return new ResponseEntity<TeacherEntity>(teacherRepository.findById(teacherId).get(), HttpStatus.OK);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
+	}
+	
+	//	Obrisi predmet za profesora
+	@DeleteMapping(value = "/{teacherId}/courses/{courseId}")
+	public ResponseEntity<?> deleteCourseForTeacher(@PathVariable Integer teacherId, @PathVariable Integer courseId) {
+		if(teacherRepository.existsById(teacherId)) {
+			if(courseRepository.existsById(courseId)) {
+				TeacherEntity teacher = teacherRepository.findById(teacherId).get();
+				CourseEntity course = courseRepository.findById(courseId).get();
+				if(teacherCourseRepository.existsByTeacherAndCourse(teacher, course)) {
+					teacherCourseRepository.deleteById(teacherCourseRepository.findByTeacherAndCourse(teacher, course).getId());
+					return new ResponseEntity<TeacherEntity>(teacherRepository.findById(teacherId).get(), HttpStatus.OK);
+				}
+				return new ResponseEntity<RESTError>(new RESTError(7, "Teacher doesn't teach this course."), HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
 	}
 	
 	public String createErrorMessage(BindingResult result) {

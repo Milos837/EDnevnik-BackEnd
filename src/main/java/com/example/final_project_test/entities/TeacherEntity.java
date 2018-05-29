@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class TeacherEntity extends UserEntity {
 
 	@OneToOne(mappedBy = "supervisorTeacher", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JsonBackReference
 	private ClassEntity supervisesClass;
 	
 	@OneToMany(mappedBy = "teacher", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
