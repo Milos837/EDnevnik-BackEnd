@@ -12,9 +12,11 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "parent")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class ParentEntity extends UserEntity{
 	
 	@Column

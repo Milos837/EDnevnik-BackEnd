@@ -10,9 +10,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "teacher")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class TeacherEntity extends UserEntity {
 
 	@OneToOne(mappedBy = "supervisorTeacher", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)

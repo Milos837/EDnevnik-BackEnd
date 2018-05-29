@@ -1,6 +1,6 @@
 package com.example.final_project_test.entities;
 
-import java.util.List;  
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -21,9 +21,11 @@ import javax.validation.constraints.Size;
 import com.example.final_project_test.entities.enums.ECourseSemester;
 import com.example.final_project_test.entities.enums.ESchoolYear;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "course")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class CourseEntity {
 	
 	@Id

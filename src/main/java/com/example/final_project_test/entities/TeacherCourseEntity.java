@@ -14,9 +14,11 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "teacher_course")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class TeacherCourseEntity {
 	
 	@Id
