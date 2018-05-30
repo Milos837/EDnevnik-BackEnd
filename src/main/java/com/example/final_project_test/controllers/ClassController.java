@@ -22,10 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.ClassEntity;
+import com.example.final_project_test.entities.CourseEntity;
+import com.example.final_project_test.entities.StudentEntity;
 import com.example.final_project_test.entities.TeacherEntity;
 import com.example.final_project_test.entities.dto.ClassDto;
 import com.example.final_project_test.repositories.ClassRepository;
+import com.example.final_project_test.repositories.CourseRepository;
+import com.example.final_project_test.repositories.StudentRepository;
+import com.example.final_project_test.repositories.TeacherCourseRepository;
 import com.example.final_project_test.repositories.TeacherRepository;
+import com.example.final_project_test.services.ClassService;
 import com.example.final_project_test.validation.ClassCustomValidator;
 
 @RestController
@@ -37,6 +43,18 @@ public class ClassController {
 	
 	@Autowired
 	private TeacherRepository teacherRepository;
+	
+	@Autowired
+	private CourseRepository courseRepository;
+	
+	@Autowired
+	private StudentRepository studentRepository;
+	
+	@Autowired
+	private ClassService classService;
+	
+	@Autowired
+	private TeacherCourseRepository teacherCourseRepository;
 	
 	@Autowired
 	private ClassCustomValidator classValidator;
@@ -126,8 +144,36 @@ public class ClassController {
 		return new ResponseEntity<RESTError>(new RESTError(1, "Class not found."), HttpStatus.NOT_FOUND);
 	}
 	
+	//	Dodaj predmet za sve studente odeljenja
+	@PostMapping(value = "/{classId}/courses/{courseId}/teachers/{teacherId}")
+	public ResponseEntity<?> addCoursesForEntireClass(@PathVariable Integer classId
+			, @PathVariable Integer courseId, @PathVariable Integer teacherId) {
+		if(classRepository.existsById(classId)) {
+			if(courseRepository.existsById(courseId)) {
+				if(teacherRepository.existsById(teacherId)) {
+					TeacherEntity teacher = teacherRepository.findById(teacherId).get();
+					CourseEntity course = courseRepository.findById(courseId).get();
+					if (teacherCourseRepository.existsByTeacherAndCourse(teacher, course)) {
+						if (studentRepository.existsByAttendingClass(classRepository.findById(classId).get())) {
+							List<StudentEntity> modifiedStudents = classService.addCoursesForEntireClass(classId,
+									courseId, teacherId);
+							return new ResponseEntity<List<StudentEntity>>(modifiedStudents, HttpStatus.OK);
+						}
+						return new ResponseEntity<RESTError>(new RESTError(9, "Class has no students."), HttpStatus.BAD_REQUEST);
+					}
+					return new ResponseEntity<RESTError>(new RESTError(11, "Teacher course combination not found."), HttpStatus.NOT_FOUND);
+				}
+				return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(1, "Class not found."), HttpStatus.NOT_FOUND);
+	}
+
+	
 	public String createErrorMessage(BindingResult result) {
-		//return result.getAllErrors().stream().map(ObjectError::toString).collect(Collectors.joining(","));
+		// return
+		// result.getAllErrors().stream().map(ObjectError::toString).collect(Collectors.joining(","));
 		String errors = "";
 		for (ObjectError error : result.getAllErrors()) {
 			errors += error.getDefaultMessage();

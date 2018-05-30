@@ -20,11 +20,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.final_project_test.controllers.util.RESTError;
+import com.example.final_project_test.entities.CourseEntity;
 import com.example.final_project_test.entities.StudentEntity;
+import com.example.final_project_test.entities.TeacherEntity;
 import com.example.final_project_test.entities.dto.StudentDto;
 import com.example.final_project_test.repositories.ClassRepository;
+import com.example.final_project_test.repositories.CourseRepository;
 import com.example.final_project_test.repositories.ParentRepository;
 import com.example.final_project_test.repositories.StudentRepository;
+import com.example.final_project_test.repositories.TeacherCourseRepository;
+import com.example.final_project_test.repositories.TeacherRepository;
+import com.example.final_project_test.services.StudentService;
 import com.example.final_project_test.validation.StudentCustomValidator;
 
 @RestController
@@ -33,16 +39,28 @@ public class StudentController {
 
 	@Autowired
 	private StudentRepository studentRepository;
-	
+
 	@Autowired
 	private ClassRepository classRepository;
-	
+
 	@Autowired
 	private ParentRepository parentRepository;
-	
+
+	@Autowired
+	private CourseRepository courseRepository;
+
+	@Autowired
+	private TeacherRepository teacherRepository;
+
+	@Autowired
+	private StudentService studentService;
+
+	@Autowired
+	private TeacherCourseRepository teacherCourseRepository;
+
 	@Autowired
 	private StudentCustomValidator studentValidator;
-	
+
 	@InitBinder
 	protected void initBinder(final WebDataBinder binder) {
 		binder.addValidators(studentValidator);
@@ -67,7 +85,7 @@ public class StudentController {
 	// Dodaj novi
 	@PostMapping(value = "/")
 	public ResponseEntity<?> createNew(@Valid @RequestBody StudentDto newStudent, BindingResult result) {
-		if(result.hasErrors()) {
+		if (result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			studentValidator.validate(newStudent, result);
@@ -80,12 +98,12 @@ public class StudentController {
 		studentRepository.save(student);
 		return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
 	}
-	
-	//	Dodaj odeljenje za ucenika
+
+	// Dodaj odeljenje za ucenika
 	@PostMapping(value = "/{studentId}/class/{classId}")
 	public ResponseEntity<?> addClass(@PathVariable Integer studentId, @PathVariable Integer classId) {
-		if(studentRepository.existsById(studentId)) {
-			if(classRepository.existsById(classId)) {
+		if (studentRepository.existsById(studentId)) {
+			if (classRepository.existsById(classId)) {
 				StudentEntity student = studentRepository.findById(studentId).get();
 				student.setAttendingClass(classRepository.findById(classId).get());
 				studentRepository.save(student);
@@ -95,12 +113,12 @@ public class StudentController {
 		}
 		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
 	}
-	
-	//	Promeni odeljenje za ucenika
+
+	// Promeni odeljenje za ucenika
 	@PutMapping(value = "/{studentId}/class/{classId}")
 	public ResponseEntity<?> updateClass(@PathVariable Integer studentId, @PathVariable Integer classId) {
-		if(studentRepository.existsById(studentId)) {
-			if(classRepository.existsById(classId)) {
+		if (studentRepository.existsById(studentId)) {
+			if (classRepository.existsById(classId)) {
 				StudentEntity student = studentRepository.findById(studentId).get();
 				student.setAttendingClass(classRepository.findById(classId).get());
 				studentRepository.save(student);
@@ -110,12 +128,12 @@ public class StudentController {
 		}
 		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
 	}
-	
-	//	Dodaj roditelja uceniku
+
+	// Dodaj roditelja uceniku
 	@PostMapping(value = "/{studentId}/parent/{parentId}")
 	public ResponseEntity<?> addParent(@PathVariable Integer studentId, @PathVariable Integer parentId) {
-		if(studentRepository.existsById(studentId)) {
-			if(parentRepository.existsById(parentId)) {
+		if (studentRepository.existsById(studentId)) {
+			if (parentRepository.existsById(parentId)) {
 				StudentEntity student = studentRepository.findById(studentId).get();
 				student.setParent(parentRepository.findById(parentId).get());
 				studentRepository.save(student);
@@ -125,11 +143,37 @@ public class StudentController {
 		}
 		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
 	}
-	
-	
-	
+
+	// Dodaj predmet studentu
+	@PostMapping(value = "/{studentId}/courses/{courseId}/teachers/{teacherId}")
+	public ResponseEntity<?> addCourseForStudent(@PathVariable Integer studentId, @PathVariable Integer courseId,
+			@PathVariable Integer teacherId) {
+		if (studentRepository.existsById(studentId)) {
+			if (courseRepository.existsById(courseId)) {
+				if (teacherRepository.existsById(teacherId)) {
+					TeacherEntity teacher = teacherRepository.findById(teacherId).get();
+					CourseEntity course = courseRepository.findById(courseId).get();
+					if (teacherCourseRepository.existsByTeacherAndCourse(teacher, course)) {
+						StudentEntity student = studentService.addCourseForStudent(studentId, courseId, teacherId);
+						if (student != null) {
+							return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
+						}
+						return new ResponseEntity<RESTError>(new RESTError(10, "Student already has that course."),
+								HttpStatus.NOT_FOUND);
+					}
+					return new ResponseEntity<RESTError>(new RESTError(11, "Teacher course combination not found."),
+							HttpStatus.NOT_FOUND);
+				}
+				return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
+	}
+
 	public String createErrorMessage(BindingResult result) {
-		//return result.getAllErrors().stream().map(ObjectError::toString).collect(Collectors.joining(","));
+		// return
+		// result.getAllErrors().stream().map(ObjectError::toString).collect(Collectors.joining(","));
 		String errors = "";
 		for (ObjectError error : result.getAllErrors()) {
 			errors += error.getDefaultMessage();

@@ -87,11 +87,16 @@ public class TeacherController {
 	public ResponseEntity<?> addCourseForTeacher(@PathVariable Integer teacherId, @PathVariable Integer courseId) {
 		if(teacherRepository.existsById(teacherId)) {
 			if(courseRepository.existsById(courseId)) {
-				TeacherCourseEntity TCE = new TeacherCourseEntity();
-				TCE.setTeacher(teacherRepository.findById(teacherId).get());
-				TCE.setCourse(courseRepository.findById(courseId).get());
-				teacherCourseRepository.save(TCE);
-				return new ResponseEntity<TeacherEntity>(teacherRepository.findById(teacherId).get(), HttpStatus.OK);
+				TeacherEntity teacher = teacherRepository.findById(teacherId).get();
+				CourseEntity course = courseRepository.findById(courseId).get();
+				if(!teacherCourseRepository.existsByTeacherAndCourse(teacher, course)) {
+					TeacherCourseEntity TCE = new TeacherCourseEntity();
+					TCE.setTeacher(teacherRepository.findById(teacherId).get());
+					TCE.setCourse(courseRepository.findById(courseId).get());
+					teacherCourseRepository.save(TCE);
+					return new ResponseEntity<TeacherEntity>(teacherRepository.findById(teacherId).get(), HttpStatus.OK);
+				}
+				return new ResponseEntity<RESTError>(new RESTError(11, "Teacher course combination not found."), HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
 		}
