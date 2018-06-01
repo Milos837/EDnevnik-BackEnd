@@ -9,5 +9,7 @@ import com.example.final_project_test.entities.TeacherCourseEntity;
 public interface StudentTeacherCourseRepository extends CrudRepository<StudentTeacherCourseEntity, Integer> {
 
 	Boolean existsByStudentAndTeacherCourse(StudentEntity student, TeacherCourseEntity teacherCourse);
+	
+	StudentTeacherCourseEntity findByStudentAndTeacherCourse(StudentEntity student, TeacherCourseEntity teacherCourse);
 
 }
