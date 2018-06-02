@@ -18,6 +18,7 @@ import javax.validation.constraints.NotNull;
 
 import com.example.final_project_test.entities.enums.EGradeType;
 import com.example.final_project_test.entities.enums.EGradeValue;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
 @Table(name = "grade")
@@ -38,6 +39,7 @@ public class GradeEntity {
 	private EGradeType type;
 
 	@Column
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MMM-yyyy HH:mm")
 	private ZonedDateTime dateUTC;
 
 	@Column
@@ -78,11 +80,11 @@ public class GradeEntity {
 		this.type = type;
 	}
 
-	public ZonedDateTime getDate() {
+	public ZonedDateTime getDateUTC() {
 		return dateUTC;
 	}
 
-	public void setDate(ZonedDateTime dateUTC) {
+	public void setDateUTC(ZonedDateTime dateUTC) {
 		this.dateUTC = dateUTC;
 	}
 

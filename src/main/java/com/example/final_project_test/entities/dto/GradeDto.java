@@ -10,11 +10,11 @@ import com.example.final_project_test.entities.enums.EGradeValue;
 public class GradeDto {
 	
 		@Enumerated(EnumType.STRING)
-		@NotNull(message = "Grade value must not be null.")
+		@NotNull(message = "Grade value null or invalid. Accepted values: [INSUFFICIENT, SUFFICIENT, GOOD, VERY_GOOD, EXCELLENT]")
 		private EGradeValue value;
 
 		@Enumerated(EnumType.STRING)
-		@NotNull(message = "Grade type must not be null.")
+		@NotNull(message = "Grade type null or invalid. Accepted values: [TEST, ESSAY, ORAL, FINAL].")
 		private EGradeType type;
 
 		public GradeDto() {

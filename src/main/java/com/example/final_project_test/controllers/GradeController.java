@@ -45,7 +45,7 @@ public class GradeController {
 	// Dodaj novi
 	@PostMapping(value = "/")
 	public ResponseEntity<?> createNew(@RequestBody GradeEntity gradeEntity) {
-		gradeEntity.setDate(ZonedDateTime.now(ZoneOffset.UTC));
+		gradeEntity.setDateUTC(ZonedDateTime.now(ZoneOffset.UTC));
 		gradeEntity.setFinalGrade(false);
 		return new ResponseEntity<GradeEntity>(gradeRepository.save(gradeEntity), HttpStatus.OK);
 	}

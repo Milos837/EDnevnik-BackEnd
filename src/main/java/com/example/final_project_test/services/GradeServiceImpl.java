@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.CourseEntity;
@@ -23,6 +24,7 @@ import com.example.final_project_test.repositories.StudentTeacherCourseRepositor
 import com.example.final_project_test.repositories.TeacherCourseRepository;
 import com.example.final_project_test.repositories.TeacherRepository;
 
+@Service
 public class GradeServiceImpl implements GradeService{
 	
 	@Autowired
@@ -56,7 +58,7 @@ public class GradeServiceImpl implements GradeService{
 					grade.setStudentTeacherCourse(stce);
 					grade.setValue(newGrade.getValue());
 					grade.setType(newGrade.getType());
-					grade.setDate(ZonedDateTime.now(ZoneOffset.UTC));
+					grade.setDateUTC(ZonedDateTime.now(ZoneOffset.UTC));
 					grade.setFinalGrade(false);
 					gradeRepository.save(grade);
 					return new ResponseEntity<GradeEntity>(grade, HttpStatus.OK);
