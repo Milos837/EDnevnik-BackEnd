@@ -70,6 +70,21 @@ public class GradeServiceImpl implements GradeService{
 		return new ResponseEntity<RESTError>(new RESTError(7, "Teacher doesn't teach this course."), HttpStatus.NOT_FOUND);
 	}
 	
+	public ResponseEntity<?> gradeStudent(GradeDto newGrade, Integer studentTeacherCourse) {
+		StudentTeacherCourseEntity stce = studentTeacherCourseRepository.findById(studentTeacherCourse).get();
+		if(!checkForFinalGrade(stce)) {
+			GradeEntity grade = new GradeEntity();
+			grade.setStudentTeacherCourse(stce);
+			grade.setValue(newGrade.getValue());
+			grade.setType(newGrade.getType());
+			grade.setDateUTC(ZonedDateTime.now(ZoneOffset.UTC));
+			grade.setFinalGrade(false);
+			gradeRepository.save(grade);
+			return new ResponseEntity<GradeEntity>(grade, HttpStatus.OK);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(13, "Student already has final grade."), HttpStatus.NOT_FOUND);
+	}
+	
 	//	Proveri da li student ima zakljucnu ocenu iz predmeta kod nastavnika
 	public Boolean checkForFinalGrade(StudentTeacherCourseEntity stce) {
 		List<GradeEntity> grades = gradeRepository.findByStudentTeacherCourse(stce);

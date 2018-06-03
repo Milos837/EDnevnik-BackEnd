@@ -1,24 +1,28 @@
 package com.example.final_project_test.controllers;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.GradeEntity;
+import com.example.final_project_test.entities.dto.GradeDto;
 import com.example.final_project_test.repositories.GradeRepository;
+import com.example.final_project_test.repositories.StudentTeacherCourseRepository;
+import com.example.final_project_test.services.GradeService;
 
 @RestController
 @RequestMapping(value = "/api/v1/grades")
@@ -26,6 +30,12 @@ public class GradeController {
 
 	@Autowired
 	private GradeRepository gradeRepository;
+	
+	@Autowired
+	private StudentTeacherCourseRepository studentTeacherCourseRepository;
+	
+	@Autowired
+	private GradeService gradeService;
 
 	// Vrati sve
 	@GetMapping(value = "/")
@@ -43,28 +53,18 @@ public class GradeController {
 	}
 
 	// Dodaj novi
-	@PostMapping(value = "/")
-	public ResponseEntity<?> createNew(@RequestBody GradeEntity gradeEntity) {
-		gradeEntity.setDateUTC(ZonedDateTime.now(ZoneOffset.UTC));
-		gradeEntity.setFinalGrade(false);
-		return new ResponseEntity<GradeEntity>(gradeRepository.save(gradeEntity), HttpStatus.OK);
+	@PostMapping(value = "/{studentTeacherCourse}")
+	public ResponseEntity<?> createNew(@PathVariable Integer studentTeacherCourse, @Valid @RequestBody GradeDto newGrade
+			,BindingResult result) {
+		if(studentTeacherCourseRepository.existsById(studentTeacherCourse)) {
+			if(!result.hasErrors()) {
+				return gradeService.gradeStudent(newGrade, studentTeacherCourse);
+			}
+			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(12, "Student teacher course combination not found."), HttpStatus.NOT_FOUND);
 	}
 
-	// Izmeni po ID-u
-	@PutMapping(value = "/{id}")
-	public ResponseEntity<?> updateById(@PathVariable Integer id, @RequestBody GradeEntity gradeEntity) {
-		if (gradeRepository.existsById(id)) {
-			GradeEntity grade = gradeRepository.findById(id).get();
-			if (gradeEntity.getValue() != null) {
-				grade.setValue(gradeEntity.getValue());
-			}
-			if (gradeEntity.getType() != null) {
-				grade.setType(gradeEntity.getType());
-			}
-			return new ResponseEntity<GradeEntity>(gradeRepository.save(grade), HttpStatus.OK);
-		}
-		return new ResponseEntity<RESTError>(new RESTError(3, "Grade not found."), HttpStatus.NOT_FOUND);
-	}
 
 	// Obrisi po ID-u
 	@DeleteMapping(value = "/{id}")
@@ -75,6 +75,16 @@ public class GradeController {
 			return new ResponseEntity<GradeEntity>(temp, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(3, "Grade not found."), HttpStatus.NOT_FOUND);
+	}
+	
+	public String createErrorMessage(BindingResult result) {
+		//return result.getAllErrors().stream().map(ObjectError::toString).collect(Collectors.joining(","));
+		String errors = "";
+		for (ObjectError error : result.getAllErrors()) {
+			errors += error.getDefaultMessage();
+			errors += "\n";
+		}
+		return errors;
 	}
 
 }

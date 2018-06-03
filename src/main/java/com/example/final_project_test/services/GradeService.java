@@ -9,6 +9,8 @@ public interface GradeService {
 	
 	ResponseEntity<?> gradeStudent(GradeDto newGrade, Integer studentId, Integer teacherId, Integer courseId);
 	
+	ResponseEntity<?> gradeStudent(GradeDto newGrade, Integer studentTeacherCourse);
+	
 	Boolean checkForFinalGrade(StudentTeacherCourseEntity stce);
 
 }

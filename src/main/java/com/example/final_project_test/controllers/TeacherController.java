@@ -22,13 +22,10 @@ import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.CourseEntity;
 import com.example.final_project_test.entities.TeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherEntity;
-import com.example.final_project_test.entities.dto.GradeDto;
 import com.example.final_project_test.entities.dto.TeacherDto;
 import com.example.final_project_test.repositories.CourseRepository;
-import com.example.final_project_test.repositories.StudentRepository;
 import com.example.final_project_test.repositories.TeacherCourseRepository;
 import com.example.final_project_test.repositories.TeacherRepository;
-import com.example.final_project_test.services.GradeService;
 import com.example.final_project_test.validation.TeacherCustomValidator;
 
 @RestController
@@ -43,12 +40,6 @@ public class TeacherController {
 	
 	@Autowired
 	private TeacherCourseRepository	teacherCourseRepository;
-	
-	@Autowired
-	private StudentRepository studentRepository;
-	
-	@Autowired
-	private GradeService gradeService;
 	
 	@Autowired
 	private TeacherCustomValidator teacherValidator;
@@ -124,25 +115,6 @@ public class TeacherController {
 					return new ResponseEntity<TeacherEntity>(teacherRepository.findById(teacherId).get(), HttpStatus.OK);
 				}
 				return new ResponseEntity<RESTError>(new RESTError(7, "Teacher doesn't teach this course."), HttpStatus.NOT_FOUND);
-			}
-			return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
-	}
-	
-	//	Oceni ucenika
-	@PostMapping(value = "/{teacherId}/courses/{courseId}/students/{studentId}/grade/")
-	public ResponseEntity<?> gradeStudent(@PathVariable Integer teacherId, @PathVariable Integer courseId
-			, @PathVariable Integer studentId, @Valid @RequestBody GradeDto newGrade, BindingResult result) {
-		if(teacherRepository.existsById(teacherId)) {
-			if(courseRepository.existsById(courseId)) {
-				if (studentRepository.existsById(studentId)) {
-					if(!result.hasErrors()) {
-						return gradeService.gradeStudent(newGrade, studentId, teacherId, courseId);
-					}
-					return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
-				}
-				return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
 		}
