@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.final_project_test.config.Encryption;
 import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.CourseEntity;
 import com.example.final_project_test.entities.StudentEntity;
@@ -27,6 +28,7 @@ import com.example.final_project_test.entities.dto.StudentDto;
 import com.example.final_project_test.repositories.ClassRepository;
 import com.example.final_project_test.repositories.CourseRepository;
 import com.example.final_project_test.repositories.ParentRepository;
+import com.example.final_project_test.repositories.RoleRepository;
 import com.example.final_project_test.repositories.StudentRepository;
 import com.example.final_project_test.repositories.TeacherCourseRepository;
 import com.example.final_project_test.repositories.TeacherRepository;
@@ -57,6 +59,9 @@ public class StudentController {
 
 	@Autowired
 	private TeacherCourseRepository teacherCourseRepository;
+	
+	@Autowired
+	private RoleRepository roleRepository;
 
 	@Autowired
 	private StudentCustomValidator studentValidator;
@@ -94,7 +99,8 @@ public class StudentController {
 		student.setFirstName(newStudent.getFirstName());
 		student.setLastName(newStudent.getLastName());
 		student.setUsername(newStudent.getUsername());
-		student.setPassword(newStudent.getPassword());
+		student.setPassword(Encryption.getPassEncoded(newStudent.getPassword()));
+		student.setRole(roleRepository.findById(3).get());
 		studentRepository.save(student);
 		return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
 	}

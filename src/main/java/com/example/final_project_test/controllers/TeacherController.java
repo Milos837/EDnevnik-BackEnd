@@ -1,11 +1,13 @@
 package com.example.final_project_test.controllers;
 
 import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -18,12 +20,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.final_project_test.config.Encryption;
 import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.CourseEntity;
 import com.example.final_project_test.entities.TeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherEntity;
 import com.example.final_project_test.entities.dto.TeacherDto;
 import com.example.final_project_test.repositories.CourseRepository;
+import com.example.final_project_test.repositories.RoleRepository;
 import com.example.final_project_test.repositories.TeacherCourseRepository;
 import com.example.final_project_test.repositories.TeacherRepository;
 import com.example.final_project_test.validation.TeacherCustomValidator;
@@ -40,6 +44,9 @@ public class TeacherController {
 	
 	@Autowired
 	private TeacherCourseRepository	teacherCourseRepository;
+	
+	@Autowired
+	private RoleRepository roleRepository;
 	
 	@Autowired
 	private TeacherCustomValidator teacherValidator;
@@ -66,6 +73,7 @@ public class TeacherController {
 	}
 
 	// Dodaj novi
+	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/")
 	public ResponseEntity<?> createNew(@Valid @RequestBody TeacherDto newTeacher, BindingResult result) {
 		if(result.hasErrors()) {
@@ -77,7 +85,8 @@ public class TeacherController {
 		teacher.setFirstName(newTeacher.getFirstName());
 		teacher.setLastName(newTeacher.getLastName());
 		teacher.setUsername(newTeacher.getUsername());
-		teacher.setPassword(newTeacher.getPassword());
+		teacher.setPassword(Encryption.getPassEncoded(newTeacher.getPassword()));
+		teacher.setRole(roleRepository.findById(2).get());
 		teacherRepository.save(teacher);
 		return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
 	}

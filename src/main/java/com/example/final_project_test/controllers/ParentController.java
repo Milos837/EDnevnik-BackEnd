@@ -18,10 +18,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.final_project_test.config.Encryption;
 import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.ParentEntity;
 import com.example.final_project_test.entities.dto.ParentDto;
 import com.example.final_project_test.repositories.ParentRepository;
+import com.example.final_project_test.repositories.RoleRepository;
 import com.example.final_project_test.validation.ParentCustomValidator;
 
 @RestController
@@ -30,6 +32,9 @@ public class ParentController {
 
 	@Autowired
 	private ParentRepository parentRepository;
+	
+	@Autowired
+	private RoleRepository roleRepository;
 	
 	@Autowired
 	private ParentCustomValidator parentValidator;
@@ -66,8 +71,9 @@ public class ParentController {
 		parent.setFirstName(newParent.getFirstName());
 		parent.setLastName(newParent.getLastName());
 		parent.setUsername(newParent.getUsername());
-		parent.setPassword(newParent.getPassword());
+		parent.setPassword(Encryption.getPassEncoded(newParent.getPassword()));
 		parent.setEmail(newParent.getEmail());
+		parent.setRole(roleRepository.findById(4).get());
 		parentRepository.save(parent);
 		return new ResponseEntity<ParentEntity>(parent, HttpStatus.OK);
 	}

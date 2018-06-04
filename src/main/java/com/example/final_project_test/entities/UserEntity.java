@@ -1,42 +1,42 @@
 package com.example.final_project_test.entities;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Version;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
-@MappedSuperclass
+@Entity
+//@MappedSuperclass
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class UserEntity {
+public abstract class UserEntity {
 	
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.TABLE)
 	private Integer id;
 	
 	@Column
-	@NotNull(message = "Username must not be null")
-	@Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters.")
 	private String username;
 	
 	@Column
-	@NotNull(message = "Password must not be null")
-	@Size(min = 5, max = 15, message = "Password must be between {min} and {max} characters.")
 	private String password;
 	
 	@Column
-	@NotNull(message = "First name must not be null.")
-	@Size(min = 2, max = 30, message = "First name must be between {min} and {max} characters.")
 	private String firstName;
 	
 	@Column
-	@NotNull(message = "Last name must not be null")
-	@Size(min = 2, max = 30, message = "First name must be between {min} and {max} characters.")
 	private String lastName;
+	
+	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JoinColumn(name = "role")
+	private RoleEntity role;
 	
 	@Version
 	private Integer version;
@@ -73,6 +73,12 @@ public class UserEntity {
 	}
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+	public RoleEntity getRole() {
+		return role;
+	}
+	public void setRole(RoleEntity role) {
+		this.role = role;
 	}
 	public Integer getVersion() {
 		return version;
