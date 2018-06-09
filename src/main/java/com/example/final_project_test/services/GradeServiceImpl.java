@@ -123,7 +123,7 @@ public class GradeServiceImpl implements GradeService{
 		String studentName = stc.getStudent().getFirstName() + stc.getStudent().getLastName();
 		String table = "<html>\r\n" + 
 				"<body>\r\n" + 
-				"	<table border=\"4px\">\r\n" + 
+				"	<br><table border=\"4px\">\r\n" + 
 				"		<tr>\r\n" + 
 				"			<th>Teacher</th>\r\n" + 
 				"			<th>Course</th>\r\n" + 
@@ -136,7 +136,7 @@ public class GradeServiceImpl implements GradeService{
 				"		</tr>\r\n" + 
 				"	</table>\r\n" + 
 				"</body>\r\n" + 
-				"</html>";
+				"<br></html>";
 		String text = "Greetings, your child " + studentName + " has received new grade:" + table + "Regards, school administration.";
 		helper.setText(text, true);
 		
