@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -41,12 +42,14 @@ public class CourseController {
 	}
 
 	// Vrati sve
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/")
 	public ResponseEntity<?> getAll() {
 		return new ResponseEntity<List<CourseEntity>>((List<CourseEntity>) courseRepository.findAll(), HttpStatus.OK);
 	}
 
 	// Vrati po ID-u
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<?> getById(@PathVariable Integer id) {
 		if (courseRepository.existsById(id)) {
@@ -56,6 +59,7 @@ public class CourseController {
 	}
 
 	// Dodaj novi
+	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/")
 	public ResponseEntity<?> createNew(@Valid @RequestBody CourseDto newCourse, BindingResult result) {
 		if(result.hasErrors()) {
@@ -75,6 +79,7 @@ public class CourseController {
 	
 
 	// Obrisi po ID-u
+	@Secured("ROLE_ADMIN")
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<?> deleteById(@PathVariable Integer id) {
 		if (courseRepository.existsById(id)) {

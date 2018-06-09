@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -72,6 +73,7 @@ public class StudentController {
 	}
 
 	// Vrati sve
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/")
 	public ResponseEntity<?> getAll() {
 		return new ResponseEntity<List<StudentEntity>>((List<StudentEntity>) studentRepository.findAll(),
@@ -79,6 +81,7 @@ public class StudentController {
 	}
 
 	// Vrati po ID-u
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<?> getById(@PathVariable Integer id) {
 		if (studentRepository.existsById(id)) {
@@ -88,6 +91,7 @@ public class StudentController {
 	}
 
 	// Dodaj novi
+	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/")
 	public ResponseEntity<?> createNew(@Valid @RequestBody StudentDto newStudent, BindingResult result) {
 		if (result.hasErrors()) {
@@ -106,6 +110,7 @@ public class StudentController {
 	}
 
 	// Dodaj odeljenje za ucenika
+	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/{studentId}/class/{classId}")
 	public ResponseEntity<?> addClass(@PathVariable Integer studentId, @PathVariable Integer classId) {
 		if (studentRepository.existsById(studentId)) {
@@ -121,6 +126,7 @@ public class StudentController {
 	}
 
 	// Promeni odeljenje za ucenika
+	@Secured("ROLE_ADMIN")
 	@PutMapping(value = "/{studentId}/class/{classId}")
 	public ResponseEntity<?> updateClass(@PathVariable Integer studentId, @PathVariable Integer classId) {
 		if (studentRepository.existsById(studentId)) {
@@ -136,6 +142,7 @@ public class StudentController {
 	}
 
 	// Dodaj roditelja uceniku
+	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/{studentId}/parent/{parentId}")
 	public ResponseEntity<?> addParent(@PathVariable Integer studentId, @PathVariable Integer parentId) {
 		if (studentRepository.existsById(studentId)) {
@@ -151,6 +158,7 @@ public class StudentController {
 	}
 
 	// Dodaj predmet studentu
+	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/{studentId}/courses/{courseId}/teachers/{teacherId}")
 	public ResponseEntity<?> addCourseForStudent(@PathVariable Integer studentId, @PathVariable Integer courseId,
 			@PathVariable Integer teacherId) {

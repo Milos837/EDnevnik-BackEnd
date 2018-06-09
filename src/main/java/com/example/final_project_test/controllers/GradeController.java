@@ -1,12 +1,16 @@
 package com.example.final_project_test.controllers;
 
+import java.security.Principal;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AuthorizationServiceException;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.GradeEntity;
 import com.example.final_project_test.entities.dto.GradeDto;
+import com.example.final_project_test.repositories.AdminRepository;
 import com.example.final_project_test.repositories.GradeRepository;
 import com.example.final_project_test.repositories.StudentTeacherCourseRepository;
 import com.example.final_project_test.services.GradeService;
@@ -36,14 +41,19 @@ public class GradeController {
 	
 	@Autowired
 	private GradeService gradeService;
+	
+	@Autowired
+	private AdminRepository adminRepository;
 
 	// Vrati sve
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/")
 	public ResponseEntity<?> getAll() {
 		return new ResponseEntity<List<GradeEntity>>((List<GradeEntity>) gradeRepository.findAll(), HttpStatus.OK);
 	}
 
 	// Vrati po ID-u
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<?> getById(@PathVariable Integer id) {
 		if (gradeRepository.existsById(id)) {
@@ -52,11 +62,18 @@ public class GradeController {
 		return new ResponseEntity<RESTError>(new RESTError(3, "Grade not found."), HttpStatus.NOT_FOUND);
 	}
 
-	// Dodaj novi
+	// Dodaj novu ocenu
+	@Secured({"ROLE_ADMIN", "ROLE_TEACHER"})
 	@PostMapping(value = "/{studentTeacherCourse}")
 	public ResponseEntity<?> createNew(@PathVariable Integer studentTeacherCourse, @Valid @RequestBody GradeDto newGrade
-			,BindingResult result) {
+			,BindingResult result, HttpServletRequest request) {
 		if(studentTeacherCourseRepository.existsById(studentTeacherCourse)) {
+			Principal principal = request.getUserPrincipal();
+			if(!principal.getName().equals(studentTeacherCourseRepository.findById(studentTeacherCourse)
+											.get().getTeacherCourse().getTeacher().getUsername())
+												&& !adminRepository.existsByUsername(principal.getName())) {
+				throw new AuthorizationServiceException("Forbidden");
+			}
 			if(!result.hasErrors()) {
 				return gradeService.gradeStudent(newGrade, studentTeacherCourse);
 			}
@@ -67,6 +84,7 @@ public class GradeController {
 
 
 	// Obrisi po ID-u
+	@Secured("ROLE_ADMIN")
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<?> deleteByID(@PathVariable Integer id) {
 		if (gradeRepository.existsById(id)) {

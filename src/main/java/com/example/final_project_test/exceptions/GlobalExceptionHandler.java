@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
-public class UncaughtExceptionHandler {
+public class GlobalExceptionHandler {
 	
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<String> handleAll(HttpMessageNotReadableException e) {

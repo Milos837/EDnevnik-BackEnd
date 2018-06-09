@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -45,12 +46,14 @@ public class ParentController {
 	}
 	
 	// Vrati sve
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/")
 	public ResponseEntity<?> getAll() {
 		return new ResponseEntity<List<ParentEntity>>((List<ParentEntity>) parentRepository.findAll(), HttpStatus.OK);
 	}
 
 	// Vrati po ID-u
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<?> getById(@PathVariable Integer id) {
 		if (parentRepository.existsById(id)) {
@@ -60,6 +63,7 @@ public class ParentController {
 	}
 
 	// Dodaj novi
+	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/")
 	public ResponseEntity<?> createNew(@Valid @RequestBody ParentDto newParent, BindingResult result) {
 		if(result.hasErrors()) {

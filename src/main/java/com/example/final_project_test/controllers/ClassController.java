@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -65,12 +66,14 @@ public class ClassController {
 	}
 
 	// Vrati sve
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/")
 	public ResponseEntity<?> getAll() {
 		return new ResponseEntity<List<ClassEntity>>((List<ClassEntity>) classRepository.findAll(), HttpStatus.OK);
 	}
 
 	// Vrati po ID-u
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<?> getById(@PathVariable Integer id) {
 		if (classRepository.existsById(id)) {
@@ -80,6 +83,7 @@ public class ClassController {
 	}
 
 	// Dodaj novi
+	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/")
 	public ResponseEntity<?> createNew(@Valid @RequestBody ClassDto newClass, BindingResult result) {
 		if(result.hasErrors()) {
@@ -96,6 +100,7 @@ public class ClassController {
 
 
 	// Obrisi po ID-u
+	@Secured("ROLE_ADMIN")
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<?> deleteById(@PathVariable Integer id) {
 		if (classRepository.existsById(id)) {
@@ -107,6 +112,7 @@ public class ClassController {
 	}
 	
 	//	Dodaj razrednog staresinu
+	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/{classId}/supervisor/{teacherId}")
 	public ResponseEntity<?> addSupervisorTeacher(@PathVariable Integer classId, @PathVariable Integer teacherId) {
 		if(classRepository.existsById(classId)) {
@@ -126,6 +132,7 @@ public class ClassController {
 	}
 	
 	//	promeni razrednog staresinu
+	@Secured("ROLE_ADMIN")
 	@PutMapping(value = "/{classId}/supervisor/{teacherId}")
 	public ResponseEntity<?> updateSupervisorTeacher(@PathVariable Integer classId, @PathVariable Integer teacherId) {
 		if(classRepository.existsById(classId)) {
@@ -145,6 +152,7 @@ public class ClassController {
 	}
 	
 	//	Dodaj predmet za sve studente odeljenja
+	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/{classId}/courses/{courseId}/teachers/{teacherId}")
 	public ResponseEntity<?> addCoursesForEntireClass(@PathVariable Integer classId
 			, @PathVariable Integer courseId, @PathVariable Integer teacherId) {
