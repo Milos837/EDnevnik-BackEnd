@@ -3,6 +3,7 @@ package com.example.final_project_test.controllers;
 import java.security.Principal;
 import java.util.List;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
@@ -66,7 +67,7 @@ public class GradeController {
 	@Secured({"ROLE_ADMIN", "ROLE_TEACHER"})
 	@PostMapping(value = "/{studentTeacherCourse}")
 	public ResponseEntity<?> createNew(@PathVariable Integer studentTeacherCourse, @Valid @RequestBody GradeDto newGrade
-			,BindingResult result, HttpServletRequest request) {
+			,BindingResult result, HttpServletRequest request) throws MessagingException {
 		if(studentTeacherCourseRepository.existsById(studentTeacherCourse)) {
 			Principal principal = request.getUserPrincipal();
 			if(!principal.getName().equals(studentTeacherCourseRepository.findById(studentTeacherCourse)
