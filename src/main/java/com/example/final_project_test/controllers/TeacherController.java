@@ -2,6 +2,7 @@ package com.example.final_project_test.controllers;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -14,6 +15,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -147,6 +149,19 @@ public class TeacherController {
 						HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
+	}
+	
+	//	Prikazi sve predmete profesora
+	@Secured("ROLE_ADMIN")
+	@GetMapping(value = "/{teacherId}/courses/")
+	public ResponseEntity<?> getCoursesForTeacher(@PathVariable Integer teacherId) {
+		if (teacherRepository.existsById(teacherId)) {
+			TeacherEntity teacher = teacherRepository.findById(teacherId).get();
+			List<CourseEntity> courses = ((List<TeacherCourseEntity>) teacherCourseRepository.findByTeacher(teacher))
+				.stream().map(course -> course.getCourse()).collect(Collectors.toList());
+			return new ResponseEntity<List<CourseEntity>>(courses, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
 	}
