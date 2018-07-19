@@ -40,6 +40,9 @@ public abstract class UserEntity {
 	@JoinColumn(name = "role")
 	private RoleEntity role;
 	
+	@Column
+	private Boolean deleted;
+	
 	@Version
 	private Integer version;
 	
@@ -83,6 +86,12 @@ public abstract class UserEntity {
 	}
 	public void setRole(RoleEntity role) {
 		this.role = role;
+	}
+	public Boolean getDeleted() {
+		return deleted;
+	}
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
 	}
 	public Integer getVersion() {
 		return version;

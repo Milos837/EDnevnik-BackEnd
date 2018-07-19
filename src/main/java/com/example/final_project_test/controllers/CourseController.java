@@ -68,6 +68,7 @@ public class CourseController {
 			courseValidator.validate(newCourse, result);
 		}
 		CourseEntity course = new CourseEntity();
+		course.setDeleted(false);
 		course.setName(newCourse.getName());
 		course.setWeeklyHours(newCourse.getWeeklyHours());
 		course.setSemester(newCourse.getSemester());

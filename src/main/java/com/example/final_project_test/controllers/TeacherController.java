@@ -15,7 +15,6 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -36,6 +35,7 @@ import com.example.final_project_test.repositories.CourseRepository;
 import com.example.final_project_test.repositories.RoleRepository;
 import com.example.final_project_test.repositories.TeacherCourseRepository;
 import com.example.final_project_test.repositories.TeacherRepository;
+import com.example.final_project_test.services.TeacherService;
 import com.example.final_project_test.validation.TeacherCustomValidator;
 
 @RestController
@@ -56,6 +56,9 @@ public class TeacherController {
 	
 	@Autowired
 	private AdminRepository adminRepository;
+	
+	@Autowired
+	private TeacherService teacherService;
 
 	@Autowired
 	private TeacherCustomValidator teacherValidator;
@@ -69,8 +72,9 @@ public class TeacherController {
 	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/")
 	public ResponseEntity<?> getAll() {
-		return new ResponseEntity<List<TeacherEntity>>((List<TeacherEntity>) teacherRepository.findAll(),
-				HttpStatus.OK);
+		return new ResponseEntity<List<TeacherEntity>>(
+				((List<TeacherEntity>) teacherRepository.findAll())
+				.stream().filter(teacher -> !teacher.getDeleted().equals(true)).collect(Collectors.toList()), HttpStatus.OK);
 	}
 
 	// Vrati po ID-u
@@ -98,6 +102,7 @@ public class TeacherController {
 			teacherValidator.validate(newTeacher, result);
 		}
 		TeacherEntity teacher = new TeacherEntity();
+		teacher.setDeleted(false);
 		teacher.setFirstName(newTeacher.getFirstName());
 		teacher.setLastName(newTeacher.getLastName());
 		teacher.setUsername(newTeacher.getUsername());
@@ -105,6 +110,17 @@ public class TeacherController {
 		teacher.setRole(roleRepository.findById(2).get());
 		teacherRepository.save(teacher);
 		return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
+	}
+	
+	@DeleteMapping(value = "/{teacherId}")
+	public ResponseEntity<?> deleteTeacher(@PathVariable Integer teacherId) {
+		if(teacherRepository.existsById(teacherId) && teacherService.isActive(teacherId)) {
+			TeacherEntity teacher = teacherRepository.findById(teacherId).get();
+			teacher.setDeleted(true);
+			teacherRepository.save(teacher);
+			return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
 	}
 
 	// Dodaj predmet za profesora

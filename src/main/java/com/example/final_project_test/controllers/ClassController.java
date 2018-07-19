@@ -92,6 +92,7 @@ public class ClassController {
 			classValidator.validate(newClass, result);
 		}
 		ClassEntity classEntity = new ClassEntity();
+		classEntity.setDeleted(false);
 		classEntity.setClassNumber(newClass.getClassNumber());
 		classEntity.setYear(newClass.getYear());
 		classRepository.save(classEntity);

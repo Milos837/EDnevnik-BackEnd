@@ -63,5 +63,18 @@ public class ClassServiceImpl implements ClassService {
 		return modifiedStudents;
 
 	}
+	
+	@Override
+	public Boolean isActive(Integer classId) {
+		if(classRepository.existsById(classId)) {
+			ClassEntity clazz = classRepository.findById(classId).get();
+			if(clazz.getDeleted().equals(true)) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
 
 }

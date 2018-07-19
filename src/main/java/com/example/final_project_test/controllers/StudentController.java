@@ -100,6 +100,7 @@ public class StudentController {
 			studentValidator.validate(newStudent, result);
 		}
 		StudentEntity student = new StudentEntity();
+		student.setDeleted(false);
 		student.setFirstName(newStudent.getFirstName());
 		student.setLastName(newStudent.getLastName());
 		student.setUsername(newStudent.getUsername());

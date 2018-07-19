@@ -50,6 +50,18 @@ public class StudentServiceImpl implements StudentService{
 		return null;
 	}
 	
+	@Override
+	public Boolean isActive(Integer studentId) {
+		if(studentRepository.existsById(studentId)) {
+			StudentEntity student = studentRepository.findById(studentId).get();
+			if(student.getDeleted().equals(true)) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
 	
 
 }

@@ -72,6 +72,7 @@ public class ParentController {
 			parentValidator.validate(newParent, result);
 		}
 		ParentEntity parent = new ParentEntity();
+		parent.setDeleted(false);
 		parent.setFirstName(newParent.getFirstName());
 		parent.setLastName(newParent.getLastName());
 		parent.setUsername(newParent.getUsername());

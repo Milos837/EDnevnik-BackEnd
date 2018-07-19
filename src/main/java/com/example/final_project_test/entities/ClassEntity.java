@@ -48,6 +48,9 @@ public class ClassEntity {
 	@JsonBackReference
 	private List<StudentEntity> students;
 	
+	@Column
+	private Boolean deleted;
+	
 	@Version
 	private Integer version;
 	
@@ -83,6 +86,12 @@ public class ClassEntity {
 	}
 	public void setStudents(List<StudentEntity> students) {
 		this.students = students;
+	}
+	public Boolean getDeleted() {
+		return deleted;
+	}
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
 	}
 	public Integer getVersion() {
 		return version;
