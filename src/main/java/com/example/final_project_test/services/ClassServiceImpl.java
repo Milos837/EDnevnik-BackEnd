@@ -2,6 +2,7 @@ package com.example.final_project_test.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,8 @@ public class ClassServiceImpl implements ClassService {
 		TeacherEntity teacher = teacherRepository.findById(teacherId).get();
 		TeacherCourseEntity teacherCourse = teacherCourseRepository.findByTeacherAndCourse(teacher, course);
 
-		List<StudentEntity> studentsOfClass = studentRepository.findByAttendingClass(classEntity);
+		List<StudentEntity> studentsOfClass = studentRepository.findByAttendingClass(classEntity)
+				.stream().filter(student -> !student.getDeleted().equals(true)).collect(Collectors.toList());
 		List<StudentEntity> modifiedStudents = new ArrayList<>();
 
 		for (StudentEntity studentEntity : studentsOfClass) {

@@ -15,5 +15,7 @@ public interface TeacherCourseRepository extends CrudRepository<TeacherCourseEnt
 	TeacherCourseEntity findByTeacherAndCourse(TeacherEntity teacher, CourseEntity course);
 	
 	List<TeacherCourseEntity> findByTeacher(TeacherEntity teacher);
+	
+	List<TeacherCourseEntity> findByCourse(CourseEntity course);
 
 }

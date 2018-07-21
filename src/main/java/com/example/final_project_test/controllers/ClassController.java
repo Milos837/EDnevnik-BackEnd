@@ -1,6 +1,7 @@
 package com.example.final_project_test.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -33,6 +34,8 @@ import com.example.final_project_test.repositories.StudentRepository;
 import com.example.final_project_test.repositories.TeacherCourseRepository;
 import com.example.final_project_test.repositories.TeacherRepository;
 import com.example.final_project_test.services.ClassService;
+import com.example.final_project_test.services.CourseService;
+import com.example.final_project_test.services.TeacherService;
 import com.example.final_project_test.validation.ClassCustomValidator;
 
 @RestController
@@ -55,6 +58,12 @@ public class ClassController {
 	private ClassService classService;
 	
 	@Autowired
+	private TeacherService teacherService;
+	
+	@Autowired
+	private CourseService courseService;
+	
+	@Autowired
 	private TeacherCourseRepository teacherCourseRepository;
 	
 	@Autowired
@@ -69,14 +78,16 @@ public class ClassController {
 	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/")
 	public ResponseEntity<?> getAll() {
-		return new ResponseEntity<List<ClassEntity>>((List<ClassEntity>) classRepository.findAll(), HttpStatus.OK);
+		return new ResponseEntity<List<ClassEntity>>(((List<ClassEntity>) classRepository.findAll())
+				.stream().filter(clazz -> !clazz.getDeleted().equals(true))
+				.collect(Collectors.toList()), HttpStatus.OK);
 	}
 
 	// Vrati po ID-u
 	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<?> getById(@PathVariable Integer id) {
-		if (classRepository.existsById(id)) {
+		if (classRepository.existsById(id) && classService.isActive(id)) {
 			return new ResponseEntity<ClassEntity>(classRepository.findById(id).get(), HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(1, "Class not found."), HttpStatus.NOT_FOUND);
@@ -98,15 +109,32 @@ public class ClassController {
 		classRepository.save(classEntity);
 		return new ResponseEntity<ClassEntity>(classEntity, HttpStatus.OK);
 	}
+	
+	//	izmeni odeljenje
+	@PutMapping(value = "/{classId}")
+	public ResponseEntity<?> updateClass(@PathVariable Integer classId, @Valid @RequestBody ClassDto uClass,
+			BindingResult result) {
+		if (classRepository.existsById(classId) && classService.isActive(classId)) {
+			if(result.hasErrors()) {
+				return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+			}
+			ClassEntity clazz = classRepository.findById(classId).get();
+			clazz.setYear(uClass.getYear());
+			classRepository.save(clazz);
+			return new ResponseEntity<ClassEntity>(clazz, HttpStatus.OK);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(1, "Class not found."), HttpStatus.NOT_FOUND);
+	}
 
 
 	// Obrisi po ID-u
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<?> deleteById(@PathVariable Integer id) {
-		if (classRepository.existsById(id)) {
+		if (classRepository.existsById(id) && classService.isActive(id)) {
 			ClassEntity temp = classRepository.findById(id).get();
-			classRepository.deleteById(id);
+			temp.setDeleted(true);
+			classRepository.save(temp);
 			return new ResponseEntity<ClassEntity>(temp, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(1, "Class not found."), HttpStatus.NOT_FOUND);
@@ -116,8 +144,8 @@ public class ClassController {
 	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/{classId}/supervisor/{teacherId}")
 	public ResponseEntity<?> addSupervisorTeacher(@PathVariable Integer classId, @PathVariable Integer teacherId) {
-		if(classRepository.existsById(classId)) {
-			if(teacherRepository.existsById(teacherId)) {
+		if(classRepository.existsById(classId) && classService.isActive(classId)) {
+			if(teacherRepository.existsById(teacherId) && teacherService.isActive(teacherId)) {
 				if(!classRepository.existsBySupervisorTeacher(teacherRepository.findById(teacherId).get())) {
 					ClassEntity classEntity = classRepository.findById(classId).get();
 					TeacherEntity teacherEntity = teacherRepository.findById(teacherId).get();
@@ -136,8 +164,8 @@ public class ClassController {
 	@Secured("ROLE_ADMIN")
 	@PutMapping(value = "/{classId}/supervisor/{teacherId}")
 	public ResponseEntity<?> updateSupervisorTeacher(@PathVariable Integer classId, @PathVariable Integer teacherId) {
-		if(classRepository.existsById(classId)) {
-			if(teacherRepository.existsById(teacherId)) {
+		if(classRepository.existsById(classId) && classService.isActive(classId)) {
+			if(teacherRepository.existsById(teacherId) && teacherService.isActive(teacherId)) {
 				if(!classRepository.existsBySupervisorTeacher(teacherRepository.findById(teacherId).get())) {
 					ClassEntity classEntity = classRepository.findById(classId).get();
 					TeacherEntity teacherEntity = teacherRepository.findById(teacherId).get();
@@ -157,9 +185,9 @@ public class ClassController {
 	@PostMapping(value = "/{classId}/courses/{courseId}/teachers/{teacherId}")
 	public ResponseEntity<?> addCoursesForEntireClass(@PathVariable Integer classId
 			, @PathVariable Integer courseId, @PathVariable Integer teacherId) {
-		if(classRepository.existsById(classId)) {
-			if(courseRepository.existsById(courseId)) {
-				if(teacherRepository.existsById(teacherId)) {
+		if(classRepository.existsById(classId) && classService.isActive(classId)) {
+			if(courseRepository.existsById(courseId) && courseService.isActive(courseId)) {
+				if(teacherRepository.existsById(teacherId) && teacherService.isActive(teacherId)) {
 					TeacherEntity teacher = teacherRepository.findById(teacherId).get();
 					CourseEntity course = courseRepository.findById(courseId).get();
 					if (teacherCourseRepository.existsByTeacherAndCourse(teacher, course)) {
