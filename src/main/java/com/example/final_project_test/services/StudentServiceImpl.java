@@ -1,5 +1,8 @@
 package com.example.final_project_test.services;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +44,7 @@ public class StudentServiceImpl implements StudentService{
 		
 		if(!studentTeacherCourseRepository.existsByStudentAndTeacherCourse(student, teacherCourse)) {
 			StudentTeacherCourseEntity stce = new StudentTeacherCourseEntity();
+			stce.setDeleted(false);
 			stce.setStudent(student);
 			stce.setTeacherCourse(teacherCourse);
 			studentTeacherCourseRepository.save(stce);
@@ -48,6 +52,16 @@ public class StudentServiceImpl implements StudentService{
 			return student;
 		}
 		return null;
+	}
+	
+	@Override
+	public List<TeacherCourseEntity> getCourses(Integer studentId) {
+		StudentEntity student = studentRepository.findById(studentId).get();
+		List<TeacherCourseEntity> teacherCourses = ((List<StudentTeacherCourseEntity>) studentTeacherCourseRepository.findByStudent(student))
+				.stream()
+					.filter(stce -> !stce.getDeleted().equals(true))
+					.map(stc -> stc.getTeacherCourse()).collect(Collectors.toList());
+		return teacherCourses;
 	}
 	
 	@Override

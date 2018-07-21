@@ -3,6 +3,7 @@ package com.example.final_project_test.entities;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -33,6 +34,9 @@ public class TeacherCourseEntity {
 	@JoinColumn(name = "teacher")
 	private TeacherEntity teacher;
 	
+	@Column
+	private Boolean deleted;
+	
 	@OneToMany(mappedBy = "teacherCourse", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JsonBackReference
 	private List<StudentTeacherCourseEntity> studentTeacherCourse;
@@ -60,6 +64,12 @@ public class TeacherCourseEntity {
 	}
 	public void setTeacher(TeacherEntity teacher) {
 		this.teacher = teacher;
+	}
+	public Boolean getDeleted() {
+		return deleted;
+	}
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
 	}
 	public List<StudentTeacherCourseEntity> getStudentTeacherCourse() {
 		return studentTeacherCourse;

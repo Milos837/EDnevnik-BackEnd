@@ -1,5 +1,7 @@
 package com.example.final_project_test.repositories;
 
+import java.util.List;
+
 import org.springframework.data.repository.CrudRepository;
 
 import com.example.final_project_test.entities.StudentEntity;
@@ -11,5 +13,7 @@ public interface StudentTeacherCourseRepository extends CrudRepository<StudentTe
 	Boolean existsByStudentAndTeacherCourse(StudentEntity student, TeacherCourseEntity teacherCourse);
 	
 	StudentTeacherCourseEntity findByStudentAndTeacherCourse(StudentEntity student, TeacherCourseEntity teacherCourse);
+	
+	List<StudentTeacherCourseEntity> findByStudent(StudentEntity student);
 
 }

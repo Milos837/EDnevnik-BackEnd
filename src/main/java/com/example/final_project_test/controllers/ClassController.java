@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +43,8 @@ import com.example.final_project_test.validation.ClassCustomValidator;
 @RestController
 @RequestMapping(value = "/api/v1/classes")
 public class ClassController {
+	
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private ClassRepository classRepository;
@@ -107,6 +111,7 @@ public class ClassController {
 		classEntity.setClassNumber(newClass.getClassNumber());
 		classEntity.setYear(newClass.getYear());
 		classRepository.save(classEntity);
+		logger.info("Added new class: " + newClass.toString());
 		return new ResponseEntity<ClassEntity>(classEntity, HttpStatus.OK);
 	}
 	
@@ -121,6 +126,7 @@ public class ClassController {
 			ClassEntity clazz = classRepository.findById(classId).get();
 			clazz.setYear(uClass.getYear());
 			classRepository.save(clazz);
+			logger.info("Updated class with ID:" + classId.toString());
 			return new ResponseEntity<ClassEntity>(clazz, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(1, "Class not found."), HttpStatus.NOT_FOUND);
@@ -135,6 +141,7 @@ public class ClassController {
 			ClassEntity temp = classRepository.findById(id).get();
 			temp.setDeleted(true);
 			classRepository.save(temp);
+			logger.info("Deleted class with ID: " + id.toString());
 			return new ResponseEntity<ClassEntity>(temp, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(1, "Class not found."), HttpStatus.NOT_FOUND);
@@ -151,6 +158,7 @@ public class ClassController {
 					TeacherEntity teacherEntity = teacherRepository.findById(teacherId).get();
 					classEntity.setSupervisorTeacher(teacherEntity);
 					classRepository.save(classEntity);
+					logger.info("For class with ID " + classId.toString() + " added supervisor teacher with ID " + teacherId.toString());
 					return new ResponseEntity<ClassEntity>(classEntity, HttpStatus.OK);
 				}
 				return new ResponseEntity<RESTError>(new RESTError(8, "Teacher already supervises one class."), HttpStatus.NOT_FOUND);	
@@ -171,6 +179,7 @@ public class ClassController {
 					TeacherEntity teacherEntity = teacherRepository.findById(teacherId).get();
 					classEntity.setSupervisorTeacher(teacherEntity);
 					classRepository.save(classEntity);
+					logger.info("For class with ID " + classId.toString() + " changed supervisor teacher with ID " + teacherId.toString());
 					return new ResponseEntity<ClassEntity>(classEntity, HttpStatus.OK);
 				}
 				return new ResponseEntity<RESTError>(new RESTError(8, "Teacher already supervises one class."), HttpStatus.NOT_FOUND);	
@@ -194,6 +203,7 @@ public class ClassController {
 						if (studentRepository.existsByAttendingClass(classRepository.findById(classId).get())) {
 							List<StudentEntity> modifiedStudents = classService.addCoursesForEntireClass(classId,
 									courseId, teacherId);
+							logger.info("For class with ID " + classId.toString() + " added course with ID " + courseId.toString());
 							return new ResponseEntity<List<StudentEntity>>(modifiedStudents, HttpStatus.OK);
 						}
 						return new ResponseEntity<RESTError>(new RESTError(9, "Class has no students."), HttpStatus.BAD_REQUEST);
@@ -203,6 +213,19 @@ public class ClassController {
 				return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(1, "Class not found."), HttpStatus.NOT_FOUND);
+	}
+	
+	//	Vrati sve studente koji pripadaju odeljenju
+	@Secured("ROLE_ADMIN")
+	@GetMapping(value = "/{classId}/students/")
+	public ResponseEntity<?> findStudentsForClass(@PathVariable Integer classId) {
+		if(classRepository.existsById(classId) && classService.isActive(classId)) {
+			ClassEntity clazz = classRepository.findById(classId).get();
+			List<StudentEntity> students = ((List<StudentEntity>) studentRepository.findByAttendingClass(clazz))
+					.stream().filter(student -> !student.getDeleted().equals(true)).collect(Collectors.toList());
+			return new ResponseEntity<List<StudentEntity>>(students, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(1, "Class not found."), HttpStatus.NOT_FOUND);
 	}

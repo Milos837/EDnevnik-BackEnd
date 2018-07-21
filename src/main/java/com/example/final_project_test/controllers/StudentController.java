@@ -1,9 +1,12 @@
 package com.example.final_project_test.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +14,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +28,7 @@ import com.example.final_project_test.config.Encryption;
 import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.CourseEntity;
 import com.example.final_project_test.entities.StudentEntity;
+import com.example.final_project_test.entities.TeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherEntity;
 import com.example.final_project_test.entities.dto.StudentDto;
 import com.example.final_project_test.repositories.ClassRepository;
@@ -33,12 +38,19 @@ import com.example.final_project_test.repositories.RoleRepository;
 import com.example.final_project_test.repositories.StudentRepository;
 import com.example.final_project_test.repositories.TeacherCourseRepository;
 import com.example.final_project_test.repositories.TeacherRepository;
+import com.example.final_project_test.services.ClassService;
+import com.example.final_project_test.services.CourseService;
+import com.example.final_project_test.services.ParentService;
 import com.example.final_project_test.services.StudentService;
+import com.example.final_project_test.services.TeacherCourseService;
+import com.example.final_project_test.services.TeacherService;
 import com.example.final_project_test.validation.StudentCustomValidator;
 
 @RestController
 @RequestMapping(value = "/api/v1/students")
 public class StudentController {
+	
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private StudentRepository studentRepository;
@@ -57,12 +69,28 @@ public class StudentController {
 
 	@Autowired
 	private StudentService studentService;
+	
+	@Autowired
+	private ClassService classService;
+	
+	@Autowired
+	private ParentService parentService;
+	
+	@Autowired
+	private CourseService courseService;
+	
+	@Autowired
+	private TeacherService teacherService;
 
 	@Autowired
 	private TeacherCourseRepository teacherCourseRepository;
+
+	@Autowired
+	private TeacherCourseService teacherCourseService;
 	
 	@Autowired
 	private RoleRepository roleRepository;
+
 
 	@Autowired
 	private StudentCustomValidator studentValidator;
@@ -76,15 +104,16 @@ public class StudentController {
 	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/")
 	public ResponseEntity<?> getAll() {
-		return new ResponseEntity<List<StudentEntity>>((List<StudentEntity>) studentRepository.findAll(),
-				HttpStatus.OK);
+		return new ResponseEntity<List<StudentEntity>>(((List<StudentEntity>) studentRepository.findAll())
+				.stream().filter(student -> !student.getDeleted().equals(true))
+				.collect(Collectors.toList()), HttpStatus.OK);
 	}
 
 	// Vrati po ID-u
 	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<?> getById(@PathVariable Integer id) {
-		if (studentRepository.existsById(id)) {
+		if (studentRepository.existsById(id) && studentService.isActive(id)) {
 			return new ResponseEntity<StudentEntity>(studentRepository.findById(id).get(), HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
@@ -107,15 +136,49 @@ public class StudentController {
 		student.setPassword(Encryption.getPassEncoded(newStudent.getPassword()));
 		student.setRole(roleRepository.findById(3).get());
 		studentRepository.save(student);
+		logger.info("Added student: " + newStudent.toString());
 		return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
+	}
+	
+	//	Izmeni ucenika
+	@Secured("ROLE_ADMIN")
+	@PutMapping(value = "/{studentId}")
+	public ResponseEntity<?> updateStudent(@PathVariable Integer studentId, @Valid @RequestBody StudentDto ustudent, 
+			BindingResult result) {
+		if(studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
+			if (result.hasErrors()) {
+				return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+			}
+			StudentEntity student = studentRepository.findById(studentId).get();
+			student.setFirstName(ustudent.getFirstName());
+			student.setLastName(ustudent.getLastName());
+			studentRepository.save(student);
+			logger.info("Updated student with ID: " + studentId.toString());
+			return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
+	}
+	
+	//	Obrisi ucenika
+	@Secured("ROLE_ADMIN")
+	@DeleteMapping(value = "/{studentId}")
+	public ResponseEntity<?> deleteStudent(@PathVariable Integer studentId) {
+		if(studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
+			StudentEntity student = studentRepository.findById(studentId).get();
+			student.setDeleted(true);
+			studentRepository.save(student);
+			logger.info("Deleted student with ID: " + studentId.toString());
+			return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
 	}
 
 	// Dodaj odeljenje za ucenika
 	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/{studentId}/class/{classId}")
 	public ResponseEntity<?> addClass(@PathVariable Integer studentId, @PathVariable Integer classId) {
-		if (studentRepository.existsById(studentId)) {
-			if (classRepository.existsById(classId)) {
+		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
+			if (classRepository.existsById(classId) && classService.isActive(classId)) {
 				StudentEntity student = studentRepository.findById(studentId).get();
 				student.setAttendingClass(classRepository.findById(classId).get());
 				studentRepository.save(student);
@@ -130,8 +193,8 @@ public class StudentController {
 	@Secured("ROLE_ADMIN")
 	@PutMapping(value = "/{studentId}/class/{classId}")
 	public ResponseEntity<?> updateClass(@PathVariable Integer studentId, @PathVariable Integer classId) {
-		if (studentRepository.existsById(studentId)) {
-			if (classRepository.existsById(classId)) {
+		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
+			if (classRepository.existsById(classId) && classService.isActive(classId)) {
 				StudentEntity student = studentRepository.findById(studentId).get();
 				student.setAttendingClass(classRepository.findById(classId).get());
 				studentRepository.save(student);
@@ -146,8 +209,8 @@ public class StudentController {
 	@Secured("ROLE_ADMIN")
 	@PostMapping(value = "/{studentId}/parent/{parentId}")
 	public ResponseEntity<?> addParent(@PathVariable Integer studentId, @PathVariable Integer parentId) {
-		if (studentRepository.existsById(studentId)) {
-			if (parentRepository.existsById(parentId)) {
+		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
+			if (parentRepository.existsById(parentId) && parentService.isActive(parentId)) {
 				StudentEntity student = studentRepository.findById(studentId).get();
 				student.setParent(parentRepository.findById(parentId).get());
 				studentRepository.save(student);
@@ -163,12 +226,13 @@ public class StudentController {
 	@PostMapping(value = "/{studentId}/courses/{courseId}/teachers/{teacherId}")
 	public ResponseEntity<?> addCourseForStudent(@PathVariable Integer studentId, @PathVariable Integer courseId,
 			@PathVariable Integer teacherId) {
-		if (studentRepository.existsById(studentId)) {
-			if (courseRepository.existsById(courseId)) {
-				if (teacherRepository.existsById(teacherId)) {
+		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
+			if (courseRepository.existsById(courseId) && courseService.isActive(courseId)) {
+				if (teacherRepository.existsById(teacherId) && teacherService.isActive(teacherId)) {
 					TeacherEntity teacher = teacherRepository.findById(teacherId).get();
 					CourseEntity course = courseRepository.findById(courseId).get();
-					if (teacherCourseRepository.existsByTeacherAndCourse(teacher, course)) {
+					if (teacherCourseRepository.existsByTeacherAndCourse(teacher, course)
+							&& teacherCourseService.isActive(teacherCourseRepository.findByTeacherAndCourse(teacher, course).getId())) {
 						StudentEntity student = studentService.addCourseForStudent(studentId, courseId, teacherId);
 						if (student != null) {
 							return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
@@ -182,6 +246,15 @@ public class StudentController {
 				return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
+	}
+	
+	//	Vrati sve predmete za ucenika
+	@GetMapping(value = "/{studentId}/courses/")
+	public ResponseEntity<?> getCoursesForStudent(@PathVariable Integer studentId) {
+		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
+			return new ResponseEntity<List<TeacherCourseEntity>>(studentService.getCourses(studentId), HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
 	}

@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +45,8 @@ import com.example.final_project_test.validation.TeacherCustomValidator;
 @RestController
 @RequestMapping(value = "/api/v1/teachers")
 public class TeacherController {
+	
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private TeacherRepository teacherRepository;
@@ -115,6 +119,7 @@ public class TeacherController {
 		teacher.setPassword(Encryption.getPassEncoded(newTeacher.getPassword()));
 		teacher.setRole(roleRepository.findById(2).get());
 		teacherRepository.save(teacher);
+		logger.info("Added teacher: " + newTeacher.toString());
 		return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
 	}
 	
@@ -131,6 +136,7 @@ public class TeacherController {
 			teacher.setFirstName(uteacher.getFirstName());
 			teacher.setLastName(uteacher.getLastName());
 			teacherRepository.save(teacher);
+			logger.info("Updated teacher with ID: " + teacherId.toString());
 			return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
@@ -144,6 +150,7 @@ public class TeacherController {
 			TeacherEntity teacher = teacherRepository.findById(teacherId).get();
 			teacher.setDeleted(true);
 			teacherRepository.save(teacher);
+			logger.info("Deleted teacher with ID: " + teacherId.toString());
 			return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(6, "Teacher not found."), HttpStatus.NOT_FOUND);
@@ -159,6 +166,7 @@ public class TeacherController {
 				CourseEntity course = courseRepository.findById(courseId).get();
 				if (!teacherCourseRepository.existsByTeacherAndCourse(teacher, course)) {
 					TeacherCourseEntity TCE = new TeacherCourseEntity();
+					TCE.setDeleted(false);
 					TCE.setTeacher(teacherRepository.findById(teacherId).get());
 					TCE.setCourse(courseRepository.findById(courseId).get());
 					teacherCourseRepository.save(TCE);
@@ -178,12 +186,13 @@ public class TeacherController {
 	@DeleteMapping(value = "/{teacherId}/courses/{courseId}")
 	public ResponseEntity<?> deleteCourseForTeacher(@PathVariable Integer teacherId, @PathVariable Integer courseId) {
 		if (teacherRepository.existsById(teacherId) && teacherService.isActive(teacherId)) {
-			if (courseRepository.existsById(courseId)) {
+			if (courseRepository.existsById(courseId) && courseService.isActive(courseId)) {
 				TeacherEntity teacher = teacherRepository.findById(teacherId).get();
 				CourseEntity course = courseRepository.findById(courseId).get();
 				if (teacherCourseRepository.existsByTeacherAndCourse(teacher, course)) {
-					teacherCourseRepository
-							.deleteById(teacherCourseRepository.findByTeacherAndCourse(teacher, course).getId());
+					TeacherCourseEntity teacherCourse = teacherCourseRepository.findByTeacherAndCourse(teacher, course);
+					teacherCourse.setDeleted(true);
+					teacherCourseRepository.save(teacherCourse);
 					return new ResponseEntity<TeacherEntity>(teacherRepository.findById(teacherId).get(),
 							HttpStatus.OK);
 				}
@@ -203,9 +212,11 @@ public class TeacherController {
 			TeacherEntity teacher = teacherRepository.findById(teacherId).get();
 			
 			List<CourseEntity> courses = ((List<TeacherCourseEntity>) teacherCourseRepository.findByTeacher(teacher))
-				.stream().map(course -> course.getCourse())
-				.filter(course -> !course.getDeleted().equals(true))
-				.collect(Collectors.toList());
+				.stream()
+					.filter(teacherCourse -> !teacherCourse.getDeleted().equals(true))
+					.map(course -> course.getCourse())
+					.filter(course -> !course.getDeleted().equals(true))
+					.collect(Collectors.toList());
 			
 			return new ResponseEntity<List<CourseEntity>>(courses, HttpStatus.OK);
 		}

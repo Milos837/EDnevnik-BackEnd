@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,8 @@ import com.example.final_project_test.validation.CourseCustomValidator;
 @RestController
 @RequestMapping(value = "/api/v1/courses")
 public class CourseController {
+	
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private CourseRepository courseRepository;
@@ -88,6 +92,7 @@ public class CourseController {
 		course.setSemester(newCourse.getSemester());
 		course.setYear(newCourse.getYear());
 		courseRepository.save(course);
+		logger.info("Added course: " + newCourse.toString());
 		return new ResponseEntity<CourseEntity>(course, HttpStatus.OK);
 	}
 	
@@ -104,6 +109,7 @@ public class CourseController {
 			course.setSemester(ucourse.getSemester());
 			course.setWeeklyHours(ucourse.getWeeklyHours());
 			courseRepository.save(course);
+			logger.info("Updated course with ID: " + courseId.toString());
 			return new ResponseEntity<CourseEntity>(course, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
@@ -119,6 +125,7 @@ public class CourseController {
 			CourseEntity temp = courseRepository.findById(id).get();
 			temp.setDeleted(true);
 			courseRepository.save(temp);
+			logger.info("Deleted course with ID: " + id.toString());
 			return new ResponseEntity<CourseEntity>(temp, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(2, "Course not found."), HttpStatus.NOT_FOUND);
@@ -138,6 +145,18 @@ public class CourseController {
 			return new ResponseEntity<List<TeacherEntity>>(teachers, HttpStatus.OK);
 		}
 		return null;
+	}
+	
+	//	Vrati sve profesor-predmet kombinacije
+	@Secured("ROLE_ADMIN")
+	@GetMapping(value ="/teacher-course/")
+	public ResponseEntity<?> getAllTeacherCourseCombinations() {
+		List<TeacherCourseEntity> teacherCourses = ((List<TeacherCourseEntity>) teacherCourseRepository.findAll())
+				.stream()
+					.filter(teacherCourse -> !teacherCourse.getDeleted().equals(true))
+					.collect(Collectors.toList());
+		
+		return new ResponseEntity<List<TeacherCourseEntity>>(teacherCourses, HttpStatus.OK);
 	}
 	
 	public String createErrorMessage(BindingResult result) {
