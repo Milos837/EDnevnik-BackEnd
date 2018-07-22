@@ -45,6 +45,9 @@ public class GradeEntity {
 	@Column
 	private Boolean finalGrade;
 	
+	@Column
+	private Boolean deleted;
+	
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "studentTeacherCourse")
 	private StudentTeacherCourseEntity studentTeacherCourse;
@@ -94,6 +97,14 @@ public class GradeEntity {
 
 	public void setFinalGrade(Boolean finalGrade) {
 		this.finalGrade = finalGrade;
+	}
+
+	public Boolean getDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	public StudentTeacherCourseEntity getStudentTeacherCourse() {

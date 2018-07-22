@@ -63,6 +63,7 @@ public class GradeServiceImpl implements GradeService{
 				StudentTeacherCourseEntity stce = studentTeacherCourseRepository.findByStudentAndTeacherCourse(student, teacherCourse);
 				if(!checkForFinalGrade(stce)) {
 					GradeEntity grade = new GradeEntity();
+					grade.setDeleted(false);
 					grade.setStudentTeacherCourse(stce);
 					grade.setValue(newGrade.getValue());
 					grade.setType(newGrade.getType());
@@ -94,7 +95,7 @@ public class GradeServiceImpl implements GradeService{
 			grade.setFinalGrade(false);
 			gradeRepository.save(grade);
 			
-			if(stce.getStudent().getParent().getEmail() != null) {
+			if(stce.getStudent().getParent() != null && stce.getStudent().getParent().getEmail() != null) {
 				sendEmailToParent(stce, grade);
 			}
 			

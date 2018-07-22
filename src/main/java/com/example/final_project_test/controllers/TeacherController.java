@@ -172,6 +172,13 @@ public class TeacherController {
 					teacherCourseRepository.save(TCE);
 					return new ResponseEntity<TeacherEntity>(teacherRepository.findById(teacherId).get(),
 							HttpStatus.OK);
+				} else if (teacherCourseRepository.existsByTeacherAndCourse(teacher, course)
+							&& teacherCourseRepository.findByTeacherAndCourse(teacher, course).getDeleted().equals(true)) {
+					TeacherCourseEntity TCE = teacherCourseRepository.findByTeacherAndCourse(teacher, course);
+					TCE.setDeleted(false);
+					teacherCourseRepository.save(TCE);
+					return new ResponseEntity<TeacherEntity>(teacherRepository.findById(teacherId).get(),
+							HttpStatus.OK);
 				}
 				return new ResponseEntity<RESTError>(new RESTError(11, "Teacher course combination not found."),
 						HttpStatus.NOT_FOUND);

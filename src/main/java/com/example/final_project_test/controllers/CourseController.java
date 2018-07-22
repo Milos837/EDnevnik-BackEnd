@@ -153,7 +153,9 @@ public class CourseController {
 	public ResponseEntity<?> getAllTeacherCourseCombinations() {
 		List<TeacherCourseEntity> teacherCourses = ((List<TeacherCourseEntity>) teacherCourseRepository.findAll())
 				.stream()
-					.filter(teacherCourse -> !teacherCourse.getDeleted().equals(true))
+					.filter(teacherCourse -> (!teacherCourse.getDeleted().equals(true) 
+							&& !teacherCourse.getCourse().getDeleted().equals(true)
+							&& !teacherCourse.getTeacher().getDeleted().equals(true)))
 					.collect(Collectors.toList());
 		
 		return new ResponseEntity<List<TeacherCourseEntity>>(teacherCourses, HttpStatus.OK);

@@ -28,6 +28,7 @@ import com.example.final_project_test.config.Encryption;
 import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.CourseEntity;
 import com.example.final_project_test.entities.StudentEntity;
+import com.example.final_project_test.entities.StudentTeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherEntity;
 import com.example.final_project_test.entities.dto.StudentDto;
@@ -36,12 +37,14 @@ import com.example.final_project_test.repositories.CourseRepository;
 import com.example.final_project_test.repositories.ParentRepository;
 import com.example.final_project_test.repositories.RoleRepository;
 import com.example.final_project_test.repositories.StudentRepository;
+import com.example.final_project_test.repositories.StudentTeacherCourseRepository;
 import com.example.final_project_test.repositories.TeacherCourseRepository;
 import com.example.final_project_test.repositories.TeacherRepository;
 import com.example.final_project_test.services.ClassService;
 import com.example.final_project_test.services.CourseService;
 import com.example.final_project_test.services.ParentService;
 import com.example.final_project_test.services.StudentService;
+import com.example.final_project_test.services.StudentTeacherCourseService;
 import com.example.final_project_test.services.TeacherCourseService;
 import com.example.final_project_test.services.TeacherService;
 import com.example.final_project_test.validation.StudentCustomValidator;
@@ -84,6 +87,12 @@ public class StudentController {
 
 	@Autowired
 	private TeacherCourseRepository teacherCourseRepository;
+	
+	@Autowired
+	private StudentTeacherCourseRepository studentTeacherCourseRepository;
+	
+	@Autowired
+	private StudentTeacherCourseService studentTeacherCourseService;
 
 	@Autowired
 	private TeacherCourseService teacherCourseService;
@@ -255,6 +264,50 @@ public class StudentController {
 	public ResponseEntity<?> getCoursesForStudent(@PathVariable Integer studentId) {
 		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
 			return new ResponseEntity<List<TeacherCourseEntity>>(studentService.getCourses(studentId), HttpStatus.OK);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
+	}
+	
+	//	Obrisi predmet za ucenika
+	@DeleteMapping(value = "/{studentId}/courses/{tcId}")
+	public ResponseEntity<?> deleteTeacherCourseForStudent(@PathVariable Integer studentId, @PathVariable Integer tcId) {
+		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
+			if (teacherCourseRepository.existsById(tcId) && teacherCourseService.isActive(tcId)) {
+				StudentEntity student = studentRepository.findById(studentId).get();
+				TeacherCourseEntity teacherCourse = teacherCourseRepository.findById(tcId).get();
+				if (studentTeacherCourseRepository.existsByStudentAndTeacherCourse(student, teacherCourse)
+						&& studentTeacherCourseService
+						.isActive(studentTeacherCourseRepository
+								.findByStudentAndTeacherCourse(student, teacherCourse).getId())) {
+					StudentTeacherCourseEntity stce = studentTeacherCourseRepository.findByStudentAndTeacherCourse(student, teacherCourse);
+					stce.setDeleted(true);
+					studentTeacherCourseRepository.save(stce);
+					return new ResponseEntity<StudentTeacherCourseEntity>(stce, HttpStatus.OK);
+					
+				}
+				return new ResponseEntity<RESTError>(new RESTError(15, "Student does not attend that course."), HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(11, "Teacher course combination not found."),
+					HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
+	}
+	
+	//	Vrati student-teacher-course kombinaciju
+	@GetMapping(value = "/{studentId}/teacher-course/{teacherCourseId}")
+	public ResponseEntity<?> getStudentTeacherCourse(@PathVariable Integer studentId, @PathVariable Integer teacherCourseId) {
+		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
+			if (teacherCourseRepository.existsById(teacherCourseId) && teacherCourseService.isActive(teacherCourseId)) {
+				StudentEntity student = studentRepository.findById(studentId).get();
+				TeacherCourseEntity teacherCourse = teacherCourseRepository.findById(teacherCourseId).get();
+				StudentTeacherCourseEntity stce = studentTeacherCourseRepository.findByStudentAndTeacherCourse(student, teacherCourse);
+				if (stce != null && studentTeacherCourseService.isActive(stce.getId())) {
+					return new ResponseEntity<StudentTeacherCourseEntity>(stce, HttpStatus.OK);
+				}
+				return new ResponseEntity<RESTError>(new RESTError(15, "Student does not attend that course."), HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(11, "Teacher course combination not found."),
+					HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
 	}

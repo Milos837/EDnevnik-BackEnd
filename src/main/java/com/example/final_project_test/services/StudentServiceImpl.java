@@ -50,6 +50,13 @@ public class StudentServiceImpl implements StudentService{
 			studentTeacherCourseRepository.save(stce);
 			
 			return student;
+		} else if (studentTeacherCourseRepository.existsByStudentAndTeacherCourse(student, teacherCourse)
+				&& studentTeacherCourseRepository.findByStudentAndTeacherCourse(student, teacherCourse).getDeleted().equals(true)) {
+			StudentTeacherCourseEntity stce = studentTeacherCourseRepository.findByStudentAndTeacherCourse(student, teacherCourse);
+			stce.setDeleted(false);
+			studentTeacherCourseRepository.save(stce);
+			
+			return student;
 		}
 		return null;
 	}
