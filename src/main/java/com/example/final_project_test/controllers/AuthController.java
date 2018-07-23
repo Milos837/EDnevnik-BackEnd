@@ -42,7 +42,11 @@ public class AuthController {
 	public ResponseEntity<Object> login() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String role = auth.getAuthorities().iterator().next().getAuthority();
+		Integer id = adminService.findIdByUsername(auth.getName());
 		logger.info("Log in request with username: " + auth.getName());
+		if(id != null) {
+			return new ResponseEntity<>("{\"role\":\"" + role + "\", \"id\":\"" + id + "\"}", HttpStatus.OK);
+		}
 		return new ResponseEntity<>("{\"role\":\"" + role + "\"}", HttpStatus.OK);
 	}
 	

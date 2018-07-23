@@ -122,10 +122,19 @@ public class GradeController {
 	}
 
 	// Vrati sve ocene za student i teacher-course
+	@Secured({"ROLE_ADMIN", "ROLE_PARENT", "ROLE_STUDENT"})
 	@GetMapping(value = "/student/{studentId}/teacher-course/{teacherCourseId}")
-	public ResponseEntity<?> getGradeForStudentAndTeacherCourse(@PathVariable Integer studentId, @PathVariable Integer teacherCourseId) {
+	public ResponseEntity<?> getGradeForStudentAndTeacherCourse(@PathVariable Integer studentId, @PathVariable Integer teacherCourseId, 
+			HttpServletRequest request) {
 		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
 			if (teacherCourseRepository.existsById(teacherCourseId) && teacherCourseService.isActive(teacherCourseId)) {
+				Principal principal = request.getUserPrincipal();
+				if ((studentRepository.findById(studentId).get().getParent() != null &&
+						!principal.getName().equals(studentRepository.findById(studentId).get().getParent().getUsername()))
+						&& !adminRepository.existsByUsername(principal.getName())
+						&& !principal.getName().equals(studentRepository.findById(studentId).get().getUsername())) {
+					throw new AuthorizationServiceException("Forbidden");
+				}
 				StudentEntity student = studentRepository.findById(studentId).get();
 				TeacherCourseEntity teacherCourse = teacherCourseRepository.findById(teacherCourseId).get();
 				StudentTeacherCourseEntity stce = studentTeacherCourseRepository.findByStudentAndTeacherCourse(student, teacherCourse);

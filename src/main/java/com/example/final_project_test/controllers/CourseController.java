@@ -97,6 +97,7 @@ public class CourseController {
 	}
 	
 	//	izmeni predmet
+	@Secured("ROLE_ADMIN")
 	@PutMapping(value = "/{courseId}")
 	public ResponseEntity<?> updateCourse(@PathVariable Integer courseId, @Valid @RequestBody CourseDto ucourse, 
 			BindingResult result) {
@@ -132,6 +133,7 @@ public class CourseController {
 	}
 	
 	//	Vrati sve profesore koji preadaju zadati kurs
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/{courseId}/teachers/")
 	public ResponseEntity<?> getTeachersForCourse(@PathVariable Integer courseId) {
 		if (courseRepository.existsById(courseId) && courseService.isActive(courseId)) {

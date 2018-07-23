@@ -1,8 +1,10 @@
 package com.example.final_project_test.controllers;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -32,6 +35,7 @@ import com.example.final_project_test.entities.StudentTeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherEntity;
 import com.example.final_project_test.entities.dto.StudentDto;
+import com.example.final_project_test.repositories.AdminRepository;
 import com.example.final_project_test.repositories.ClassRepository;
 import com.example.final_project_test.repositories.CourseRepository;
 import com.example.final_project_test.repositories.ParentRepository;
@@ -54,6 +58,9 @@ import com.example.final_project_test.validation.StudentCustomValidator;
 public class StudentController {
 	
 	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
+	
+	@Autowired
+	private AdminRepository adminRepository;
 
 	@Autowired
 	private StudentRepository studentRepository;
@@ -119,10 +126,16 @@ public class StudentController {
 	}
 
 	// Vrati po ID-u
-	@Secured("ROLE_ADMIN")
+	@Secured({"ROLE_ADMIN", "ROLE_PARENT"})
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<?> getById(@PathVariable Integer id) {
+	public ResponseEntity<?> getById(@PathVariable Integer id, HttpServletRequest request) {
 		if (studentRepository.existsById(id) && studentService.isActive(id)) {
+			Principal principal = request.getUserPrincipal();
+			if ((studentRepository.findById(id).get().getParent() != null &&
+					!principal.getName().equals(studentRepository.findById(id).get().getParent().getUsername()))
+					&& !adminRepository.existsByUsername(principal.getName())) {
+				throw new AuthorizationServiceException("Forbidden");
+			}
 			return new ResponseEntity<StudentEntity>(studentRepository.findById(id).get(), HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
@@ -260,15 +273,24 @@ public class StudentController {
 	}
 	
 	//	Vrati sve predmete za ucenika
+	@Secured({"ROLE_ADMIN", "ROLE_PARENT", "ROLE_STUDENT"})
 	@GetMapping(value = "/{studentId}/courses/")
-	public ResponseEntity<?> getCoursesForStudent(@PathVariable Integer studentId) {
+	public ResponseEntity<?> getCoursesForStudent(@PathVariable Integer studentId, HttpServletRequest request) {
 		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
+			Principal principal = request.getUserPrincipal();
+			if ((studentRepository.findById(studentId).get().getParent() != null &&
+					!principal.getName().equals(studentRepository.findById(studentId).get().getParent().getUsername()))
+					&& !adminRepository.existsByUsername(principal.getName())
+					&& !principal.getName().equals(studentRepository.findById(studentId).get().getUsername())) {
+				throw new AuthorizationServiceException("Forbidden");
+			}
 			return new ResponseEntity<List<TeacherCourseEntity>>(studentService.getCourses(studentId), HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(5, "Student not found."), HttpStatus.NOT_FOUND);
 	}
 	
 	//	Obrisi predmet za ucenika
+	@Secured("ROLE_ADMIN")
 	@DeleteMapping(value = "/{studentId}/courses/{tcId}")
 	public ResponseEntity<?> deleteTeacherCourseForStudent(@PathVariable Integer studentId, @PathVariable Integer tcId) {
 		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
@@ -294,10 +316,19 @@ public class StudentController {
 	}
 	
 	//	Vrati student-teacher-course kombinaciju
+	@Secured({"ROLE_ADMIN", "ROLE_PARENT", "ROLE_STUDENT"})
 	@GetMapping(value = "/{studentId}/teacher-course/{teacherCourseId}")
-	public ResponseEntity<?> getStudentTeacherCourse(@PathVariable Integer studentId, @PathVariable Integer teacherCourseId) {
+	public ResponseEntity<?> getStudentTeacherCourse(@PathVariable Integer studentId, @PathVariable Integer teacherCourseId, 
+			HttpServletRequest request) {
 		if (studentRepository.existsById(studentId) && studentService.isActive(studentId)) {
 			if (teacherCourseRepository.existsById(teacherCourseId) && teacherCourseService.isActive(teacherCourseId)) {
+				Principal principal = request.getUserPrincipal();
+				if ((studentRepository.findById(studentId).get().getParent() != null &&
+						!principal.getName().equals(studentRepository.findById(studentId).get().getParent().getUsername()))
+						&& !adminRepository.existsByUsername(principal.getName())
+						&& !principal.getName().equals(studentRepository.findById(studentId).get().getUsername())) {
+					throw new AuthorizationServiceException("Forbidden");
+				}
 				StudentEntity student = studentRepository.findById(studentId).get();
 				TeacherCourseEntity teacherCourse = teacherCourseRepository.findById(teacherCourseId).get();
 				StudentTeacherCourseEntity stce = studentTeacherCourseRepository.findByStudentAndTeacherCourse(student, teacherCourse);

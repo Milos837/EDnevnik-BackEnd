@@ -22,6 +22,7 @@ import com.example.final_project_test.entities.StudentTeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherEntity;
 import com.example.final_project_test.entities.dto.GradeDto;
+import com.example.final_project_test.entities.enums.EGradeType;
 import com.example.final_project_test.repositories.CourseRepository;
 import com.example.final_project_test.repositories.GradeRepository;
 import com.example.final_project_test.repositories.StudentRepository;
@@ -68,7 +69,11 @@ public class GradeServiceImpl implements GradeService{
 					grade.setValue(newGrade.getValue());
 					grade.setType(newGrade.getType());
 					grade.setDateUTC(ZonedDateTime.now(ZoneOffset.UTC));
-					grade.setFinalGrade(false);
+					if(newGrade.getType().equals(EGradeType.FINAL)) {
+						grade.setFinalGrade(true);
+					} else {
+						grade.setFinalGrade(false);
+					}
 					gradeRepository.save(grade);
 					
 					if(stce.getStudent().getParent().getEmail() != null) {

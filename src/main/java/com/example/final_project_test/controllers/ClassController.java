@@ -116,6 +116,7 @@ public class ClassController {
 	}
 	
 	//	izmeni odeljenje
+	@Secured("ROLE_ADMIN")
 	@PutMapping(value = "/{classId}")
 	public ResponseEntity<?> updateClass(@PathVariable Integer classId, @Valid @RequestBody ClassDto uClass,
 			BindingResult result) {

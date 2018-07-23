@@ -1,8 +1,10 @@
 package com.example.final_project_test.controllers;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -27,9 +30,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.final_project_test.config.Encryption;
 import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.ParentEntity;
+import com.example.final_project_test.entities.StudentEntity;
 import com.example.final_project_test.entities.dto.ParentDto;
+import com.example.final_project_test.repositories.AdminRepository;
 import com.example.final_project_test.repositories.ParentRepository;
 import com.example.final_project_test.repositories.RoleRepository;
+import com.example.final_project_test.repositories.StudentRepository;
 import com.example.final_project_test.services.ParentService;
 import com.example.final_project_test.validation.ParentCustomValidator;
 
@@ -38,6 +44,9 @@ import com.example.final_project_test.validation.ParentCustomValidator;
 public class ParentController {
 	
 	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
+	
+	@Autowired
+	private AdminRepository adminRepository;
 
 	@Autowired
 	private ParentRepository parentRepository;
@@ -47,6 +56,9 @@ public class ParentController {
 	
 	@Autowired
 	private ParentService parentService;
+	
+	@Autowired
+	private StudentRepository studentRepository;
 	
 	@Autowired
 	private ParentCustomValidator parentValidator;
@@ -127,6 +139,26 @@ public class ParentController {
 			parentRepository.save(parent);
 			logger.info("Deleted parent with ID: " + parentId.toString());
 			return new ResponseEntity<ParentEntity>(parent, HttpStatus.OK);
+		}
+		return new ResponseEntity<RESTError>(new RESTError(4, "Parent not found."), HttpStatus.NOT_FOUND);
+	}
+	
+	//	vrati svu decu roditelja
+	@Secured({"ROLE_ADMIN", "ROLE_PARENT"})
+	@GetMapping(value = "/{parentId}/children/")
+	public ResponseEntity<?> getAllChildren(@PathVariable Integer parentId, HttpServletRequest request) {
+		if(parentRepository.existsById(parentId) && parentService.isActive(parentId)) {
+			Principal principal = request.getUserPrincipal();
+			if (!principal.getName().equals(parentRepository.findById(parentId).get().getUsername())
+					&& !adminRepository.existsByUsername(principal.getName())) {
+				throw new AuthorizationServiceException("Forbidden");
+			}
+			ParentEntity parent = parentRepository.findById(parentId).get();
+			List<StudentEntity> children = ((List<StudentEntity>) studentRepository.findByParent(parent))
+					.stream()
+						.filter(student -> !student.getDeleted().equals(true))
+						.collect(Collectors.toList());
+			return new ResponseEntity<List<StudentEntity>>(children, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(4, "Parent not found."), HttpStatus.NOT_FOUND);
 	}
