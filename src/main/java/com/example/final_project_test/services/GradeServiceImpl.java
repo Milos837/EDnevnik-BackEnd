@@ -93,11 +93,16 @@ public class GradeServiceImpl implements GradeService{
 		StudentTeacherCourseEntity stce = studentTeacherCourseRepository.findById(studentTeacherCourse).get();
 		if(!checkForFinalGrade(stce)) {
 			GradeEntity grade = new GradeEntity();
+			grade.setDeleted(false);
 			grade.setStudentTeacherCourse(stce);
 			grade.setValue(newGrade.getValue());
 			grade.setType(newGrade.getType());
 			grade.setDateUTC(ZonedDateTime.now(ZoneOffset.UTC));
-			grade.setFinalGrade(false);
+			if(newGrade.getType().equals(EGradeType.FINAL)) {
+				grade.setFinalGrade(true);
+			} else {
+				grade.setFinalGrade(false);
+			}
 			gradeRepository.save(grade);
 			
 			if(stce.getStudent().getParent() != null && stce.getStudent().getParent().getEmail() != null) {
