@@ -57,7 +57,7 @@ public class AuthController {
 	}
 	
 	@Secured("ROLE_ADMIN")
-	@GetMapping(value = "/download")
+	@PostMapping(value = "/download")
 	public ResponseEntity<Resource> downloadLogs() {
 		try {
 			File file = fileHandler.getLogs();

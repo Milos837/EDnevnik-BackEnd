@@ -25,4 +25,4 @@
 /.nb-gradle/
 
 ###	Logs ###
-logs/spring-boot-logging.log
+/logs/
