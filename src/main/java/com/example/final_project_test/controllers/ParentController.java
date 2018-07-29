@@ -28,10 +28,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.final_project_test.config.Encryption;
-import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.ParentEntity;
 import com.example.final_project_test.entities.StudentEntity;
 import com.example.final_project_test.entities.dto.ParentDto;
+import com.example.final_project_test.entities.util.RESTError;
 import com.example.final_project_test.repositories.AdminRepository;
 import com.example.final_project_test.repositories.ParentRepository;
 import com.example.final_project_test.repositories.RoleRepository;

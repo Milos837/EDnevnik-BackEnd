@@ -27,8 +27,8 @@ import com.example.final_project_test.services.FileHandler;
 
 
 @RestController
-@RequestMapping(value = "/api/v1/auth/")
-public class AuthController {
+@RequestMapping(value = "/api/v1/util/")
+public class UtilController {
 	
 	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	

@@ -15,7 +15,6 @@ import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,12 +22,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.GradeEntity;
 import com.example.final_project_test.entities.StudentEntity;
 import com.example.final_project_test.entities.StudentTeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherCourseEntity;
 import com.example.final_project_test.entities.dto.GradeDto;
+import com.example.final_project_test.entities.util.RESTError;
 import com.example.final_project_test.repositories.AdminRepository;
 import com.example.final_project_test.repositories.GradeRepository;
 import com.example.final_project_test.repositories.StudentRepository;
@@ -93,7 +92,8 @@ public class GradeController {
 	public ResponseEntity<?> createNew(@PathVariable Integer studentTeacherCourse,
 			@Valid @RequestBody GradeDto newGrade, BindingResult result, HttpServletRequest request)
 			throws MessagingException {
-		if (studentTeacherCourseRepository.existsById(studentTeacherCourse)) {
+		if (studentTeacherCourseRepository.existsById(studentTeacherCourse)
+				&& studentTeacherCourseService.isActive(studentTeacherCourse)) {
 			Principal principal = request.getUserPrincipal();
 			if (!principal.getName().equals(studentTeacherCourseRepository.findById(studentTeacherCourse).get()
 					.getTeacherCourse().getTeacher().getUsername())
@@ -110,16 +110,16 @@ public class GradeController {
 	}
 
 	// Obrisi po ID-u
-	@Secured("ROLE_ADMIN")
-	@DeleteMapping(value = "/{id}")
-	public ResponseEntity<?> deleteByID(@PathVariable Integer id) {
-		if (gradeRepository.existsById(id)) {
-			GradeEntity temp = gradeRepository.findById(id).get();
-			gradeRepository.deleteById(id);
-			return new ResponseEntity<GradeEntity>(temp, HttpStatus.OK);
-		}
-		return new ResponseEntity<RESTError>(new RESTError(3, "Grade not found."), HttpStatus.NOT_FOUND);
-	}
+//	@Secured("ROLE_ADMIN")
+//	@DeleteMapping(value = "/{id}")
+//	public ResponseEntity<?> deleteByID(@PathVariable Integer id) {
+//		if (gradeRepository.existsById(id)) {
+//			GradeEntity temp = gradeRepository.findById(id).get();
+//			gradeRepository.deleteById(id);
+//			return new ResponseEntity<GradeEntity>(temp, HttpStatus.OK);
+//		}
+//		return new ResponseEntity<RESTError>(new RESTError(3, "Grade not found."), HttpStatus.NOT_FOUND);
+//	}
 
 	// Vrati sve ocene za student i teacher-course
 	@Secured({"ROLE_ADMIN", "ROLE_PARENT", "ROLE_STUDENT"})

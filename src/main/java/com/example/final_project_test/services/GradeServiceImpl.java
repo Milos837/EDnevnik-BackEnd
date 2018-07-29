@@ -14,7 +14,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.CourseEntity;
 import com.example.final_project_test.entities.GradeEntity;
 import com.example.final_project_test.entities.StudentEntity;
@@ -23,6 +22,7 @@ import com.example.final_project_test.entities.TeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherEntity;
 import com.example.final_project_test.entities.dto.GradeDto;
 import com.example.final_project_test.entities.enums.EGradeType;
+import com.example.final_project_test.entities.util.RESTError;
 import com.example.final_project_test.repositories.CourseRepository;
 import com.example.final_project_test.repositories.GradeRepository;
 import com.example.final_project_test.repositories.StudentRepository;

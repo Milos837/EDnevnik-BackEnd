@@ -1,6 +1,11 @@
-package com.example.final_project_test.controllers.util;
+package com.example.final_project_test.entities.util;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RESTError {
+	
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 
 	private Integer code;
 
@@ -10,6 +15,7 @@ public class RESTError {
 		super();
 		this.code = code;
 		this.message = message;
+		this.logger.error("Error code " + this.code + ", message: " + this.message);
 	}
 	public Integer getCode() {
 		return code;

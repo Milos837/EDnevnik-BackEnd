@@ -24,11 +24,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.final_project_test.controllers.util.RESTError;
 import com.example.final_project_test.entities.CourseEntity;
 import com.example.final_project_test.entities.TeacherCourseEntity;
 import com.example.final_project_test.entities.TeacherEntity;
 import com.example.final_project_test.entities.dto.CourseDto;
+import com.example.final_project_test.entities.util.RESTError;
 import com.example.final_project_test.repositories.CourseRepository;
 import com.example.final_project_test.repositories.TeacherCourseRepository;
 import com.example.final_project_test.services.CourseService;
