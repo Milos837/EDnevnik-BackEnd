@@ -76,12 +76,13 @@ To run application via command line position yourself in project directory and r
 mvn spring-boot:run
 ```
 Initial users:
-Username      | Password        | Role
-------------- | -------------   |   -------------
-admin         | admin           |   Admin
-teacher       | teacher         |   Teacher
-student       | student         |   Student
-parent        | parent          |   Parent
+
+| Username | Password | Role    |
+|----------|----------|---------|
+| admin    | admin    | Admin   |
+| teacher  | teacher  | Teacher |
+| student  | student  | Student |
+| parent   | parent   | Parent  |
 ## Authors
 
 * **Miloš Tepić**
