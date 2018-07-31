@@ -31,7 +31,7 @@ What things you need to install the software and how to install them
 ### Installing
 Create MySQL database schema
 ```
-CREATE SCHEMA `db_ednevnik` DEFAULT CHARACTER SET utf8 ;
+CREATE SCHEMA `db_ednevnik` DEFAULT CHARACTER SET latin1 COLLATE latin1_general_cs ;
 ```
 Create MySQL user and grand database privileges
 ```
