@@ -28,7 +28,7 @@ What things you need to install the software and how to install them
 * [Maven](https://maven.apache.org/) - Dependency Management 
 * [MySQL](https://www.mysql.com/downloads/) - Open source relational database
 
-### Installing
+### Setup
 Create MySQL database schema
 ```
 CREATE SCHEMA `db_ednevnik` DEFAULT CHARACTER SET latin1 COLLATE latin1_general_cs ;
